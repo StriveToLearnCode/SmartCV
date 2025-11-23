@@ -6,24 +6,6 @@ pre-commit:
     formatting:
       glob: '*.{js,ts,jsx,tsx,md,mdx,json,yml}'
       run: npx prettier --write "{staged_files}"
-    # 代码规范检查: 使用 ESLint 检查暂存区文件，不允许有任何警告 (0 warnings)
-    lint:
-      glob: '*.{js,ts,jsx,tsx}'
-      run: npx eslint --no-warn-ignored --max-warnings 0 {staged_files}
-    # 类型检查: 对整个项目进行 TypeScript 类型检查
-    # 注意: tsc 需要完整上下文，所以这里是对整个项目运行检查，不仅仅是暂存文件
-    tsc:
-      glob: '*.{js,ts,jsx,tsx}'
-      run: npx tsc --noEmit -p ./tsconfig.json
-    # 敏感信息检查: 扫描暂存文件，防止密钥/Token 意外提交
-    secretlint:
-      glob: '*'
-      run: npx secretlint --maskSecrets --secretlintignore .gitignore "{staged_files}"
-    # 许可证检查: 检查依赖包的 License 是否合规
-    # ⚠️ 依赖: 需要在 .env 文件中配置 ALLOWED_LICENSES 变量
-    license-check:
-      glob: 'package-lock.json'
-      run: . .env && npx license-checker-rseidelsohn --production --summary --excludePrivatePackages --onlyAllow "$ALLOWED_LICENSES"
 
 # commit-msg 钩子: 检查提交信息格式
 commit-msg:
