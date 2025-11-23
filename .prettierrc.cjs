@@ -23,6 +23,5 @@ module.exports = {
   arrowParens: 'always',
 
   // 在对象字面量的花括号内添加空格，例如: { foo: bar }
-  bracketSpacing: true,
-
-};
+  bracketSpacing: true
+}

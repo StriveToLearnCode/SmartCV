@@ -1,0 +1,16 @@
+# 继承 commitlint 的通用配置，遵循 Conventional Commits 规范
+# 格式示例: feat: add new feature
+extends:
+  - '@commitlint/config-conventional'
+rules:
+  # 自定义规则: subject 大小写检查
+  # 2: 错误级别 (0: disable, 1: warning, 2: error)
+  # 'never': 反向匹配 (不允许以下格式)
+  # 列表: 不允许 Start Case, Sentence Case, Pascal Case
+  # 即: 推荐使用全小写 (lower-case)
+  subject-case:
+    - 2
+    - 'never'
+    - - 'start-case'
+      - 'sentence-case'
+      - 'pascal-case'
