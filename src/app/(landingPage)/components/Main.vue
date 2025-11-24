@@ -26,6 +26,10 @@
 <script setup lang="ts">
 import LeftContent from './LeftContent.vue'
 import RightCV from './RightCV.vue'
+
+const count = computed(() => {
+  return 1
+})
 </script>
 
 <style></style>
