@@ -9,19 +9,19 @@
     <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-center relative z-10">
       <!-- 左侧 -->
       <div class="relative">
-        <LeftContent />
+        <HeroContent />
       </div>
       <!-- 右侧 -->
       <div>
-        <RightCV />
+        <HeroVisual />
       </div>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import LeftContent from './LeftContent.vue'
-import RightCV from './RightCV.vue'
+import HeroContent from '../components/HeroContent.vue'
+import HeroVisual from '../components/HeroVisual.vue'
 
 const count = computed(() => {
   return 1

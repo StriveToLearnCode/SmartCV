@@ -6,14 +6,13 @@
     <div class="max-w-7xl mx-auto relative z-10">
       <div class="flex justify-between items-end mb-16 md:mb-24">
         <h2 class="font-sans font-medium text-4xl md:text-5xl text-stone-800 tracking-tight">The Toolset.</h2>
-        <span
-          class="font-sans text-[10px] md:text-xs uppercase tracking-widest text-stone-400 bg-transparent px-2 py-1"
+        <span class="font-sans text-[10px] md:text-xs uppercase tracking-widest text-stone-400 bg-transparent px-2 py-1"
           >Vol. 01 — 2024</span
         >
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
-        <div v-for="(tool, index) in DEFAULT_CONTENT.tools" :key="tool.title" class="relative group">
+        <div v-for="tool in DEFAULT_CONTENT.tools" :key="tool.title" class="relative group">
           <!-- 卡片本体 -->
           <div
             class="bg-white p-8 md:p-10 border border-stone-100 shadow-sm transition-all duration-500 ease-out hover:-translate-y-1 hover:shadow-md relative overflow-hidden min-h-[320px] flex flex-col rounded-sm"

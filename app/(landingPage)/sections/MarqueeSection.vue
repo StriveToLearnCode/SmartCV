@@ -5,12 +5,12 @@
       <div
         class="animate-marquee whitespace-nowrap font-sans font-medium text-xs md:text-sm uppercase tracking-[0.2em] flex gap-12 pr-12"
       >
-        <span v-for="i in 6" :key="`a-${i}`">开始创建你的简历 — AI Powered —</span>
+        <span v-for="i in 6" :key="`a-${i}`">{{ DEFAULT_CONTENT.marquee.text }}</span>
       </div>
       <div
         class="animate-marquee whitespace-nowrap font-sans font-medium text-xs md:text-sm uppercase tracking-[0.2em] flex gap-12 pr-12"
       >
-        <span v-for="i in 6" :key="`b-${i}`">开始创建你的简历 — AI Powered —</span>
+        <span v-for="i in 6" :key="`b-${i}`">{{ DEFAULT_CONTENT.marquee.text }}</span>
       </div>
 
       <!-- 叠加纹理 -->
@@ -19,7 +19,9 @@
   </div>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { DEFAULT_CONTENT } from '../default'
+</script>
 
 <style scoped>
 .animate-marquee {

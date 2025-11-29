@@ -8,6 +8,9 @@ export const DEFAULT_CONTENT = {
     primaryCta: '制作简历',
     secondaryCta: '查看示例'
   },
+  marquee: {
+    text: '开始创建你的简历 — AI Powered —'
+  },
   meta: {
     title: 'SmartCV - 智能简历制作',
     keywords: ['智能简历制作', '简历制作', '简历', 'AI简历', 'AI简历制作'],
