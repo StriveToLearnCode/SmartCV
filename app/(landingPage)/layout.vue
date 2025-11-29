@@ -26,4 +26,6 @@ import Footer from './components/Footer.vue'
 import Swiper from './components/Swiper.vue'
 </script>
 
-<style scoped></style>
+<style>
+@import './styles/landing.css';
+</style>
