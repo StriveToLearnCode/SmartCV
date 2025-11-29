@@ -2,7 +2,10 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({
   history: createWebHistory(),
-  routes: [{ path: '/', component: () => import('@/(landingPage)/layout.vue') }]
+  routes: [
+    { path: '/', component: () => import('@/(landingPage)/layout.vue') },
+    { path: '/dashboard', component: () => import('@/(dashboard)/layout.vue') }
+  ]
 })
 
 export default router
