@@ -1,190 +1,510 @@
 <template>
-  <div 
-    class="bg-white rounded-xl transition-all duration-500 ease-out border border-stone-100 overflow-hidden"
+  <div
+    class="bg-white rounded-2xl transition-all duration-500 ease-out border border-stone-200/60 overflow-visible group relative"
     :class="[
-      expanded ? 'shadow-lg ring-1 ring-stone-200/50' : 'shadow hover:shadow-md hover:-translate-y-0.5'
+      expanded
+        ? 'shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-stone-900/5 z-10'
+        : 'shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-stone-300'
     ]"
   >
-    <!-- 主卡片区域 (点击切换折叠) -->
-    <div 
-      class="p-6 cursor-pointer relative group"
-      @click="toggleExpand"
-    >
-      <!-- 纸质纹理叠加 -->
-      <div class="absolute inset-0 bg-paper-texture opacity-30 pointer-events-none"></div>
-      
+    <!-- Card Main Area -->
+    <div class="p-6 relative">
+      <!-- Paper Texture Overlay -->
+      <div class="absolute inset-0 bg-paper-texture opacity-40 pointer-events-none rounded-2xl"></div>
+
       <div class="relative z-10">
-        <div class="flex justify-between items-start mb-4">
+        <!-- Header Row -->
+        <div class="flex justify-between items-start mb-2 cursor-pointer" @click="toggleExpand">
           <div class="flex-1">
-            <div class="flex items-center gap-3 flex-wrap">
-              <h3 class="text-lg font-bold text-stone-800 font-serif tracking-wide group-hover:text-stone-600 transition-colors">
+            <div class="flex items-center gap-3 flex-wrap mb-1.5">
+              <h3
+                class="text-lg font-bold text-stone-800 font-serif tracking-tight group-hover:text-stone-600 transition-colors"
+              >
                 {{ job.position }}
               </h3>
               <PriorityBadge :priority="job.priority" />
             </div>
-            <div class="flex items-center gap-2 text-stone-500 text-sm mt-1">
-              <span class="font-medium">{{ job.company }}</span>
-              <span v-if="job.location" class="w-1 h-1 rounded-full bg-stone-300"></span>
+            <div class="flex items-center gap-x-3 gap-y-1 text-stone-500 text-xs flex-wrap">
+              <span class="font-bold text-stone-600">{{ job.company }}</span>
+              <span v-if="job.location" class="w-0.5 h-0.5 rounded-full bg-stone-300"></span>
               <span v-if="job.location">{{ job.location }}</span>
-              <span v-if="job.salary" class="w-1 h-1 rounded-full bg-stone-300"></span>
-              <span v-if="job.salary" class="text-stone-400">{{ job.salary }}</span>
-              <span v-if="job.deadline" class="w-1 h-1 rounded-full bg-stone-300"></span>
-              <span v-if="job.deadline" class="text-red-400 text-xs">截止: {{ job.deadline }}</span>
-            </div>
-
-            <!-- 面试提醒高亮区域 (新增) -->
-            <div v-if="job.nextInterview" class="mt-3 inline-flex items-center gap-2 px-3 py-1.5 bg-amber-50 text-amber-800 rounded-lg border border-amber-100 shadow-sm transition-transform hover:scale-105">
-              <div class="relative flex h-2 w-2">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
-              </div>
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span class="text-xs font-bold tracking-wide">面试: {{ job.nextInterview }}</span>
+              <span v-if="job.salary" class="w-0.5 h-0.5 rounded-full bg-stone-300"></span>
+              <span v-if="job.salary" class="font-medium text-stone-600">{{ job.salary }}</span>
             </div>
           </div>
           <StatusBadge :status="job.status" class="shrink-0 ml-2" />
         </div>
 
-        <!-- 进度条区域 -->
-        <div class="mt-6 mb-2 px-1">
-          <JobProgressBar :timeline="job.timeline" :progress="job.progress" />
-        </div>
-        
-        <!-- 底部展开提示 (仅在折叠时显示) -->
-        <div 
-          class="flex justify-center mt-6 transition-opacity duration-300 delay-100"
-          :class="expanded ? 'opacity-0 h-0 overflow-hidden mt-0' : 'opacity-40 group-hover:opacity-100'"
+        <!-- Next Interview & Countdown (If scheduled) -->
+        <div
+          v-if="job.nextInterviewDate"
+          class="mt-3 flex items-center gap-3 cursor-pointer"
+          @click.stop="openScheduleModal"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-stone-400 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-          </svg>
+          <div
+            class="px-3 py-1.5 bg-stone-50 border border-stone-200 rounded-lg flex items-center gap-2 hover:bg-white hover:shadow-sm transition-all group/date"
+          >
+            <div class="relative flex h-2 w-2">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+            </div>
+            <span class="text-xs font-bold text-stone-700">下次面试：{{ job.nextInterview }}</span>
+            <span
+              class="text-[10px] text-stone-400 group-hover/date:text-stone-500 border-l border-stone-200 pl-2 ml-1"
+            >
+              {{ formatCountdown(job.nextInterviewDate) }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="mt-4">
+          <JobProgressBar
+            :timeline="job.timeline"
+            :progress="job.progress"
+            :current-main-stage="job.currentMainStage"
+            @node-click="handleNodeClick"
+          />
+        </div>
+
+        <!-- Dynamic Quick Action Capsule (Collapsed Only) -->
+        <div
+          v-if="!expanded"
+          class="mt-4 pt-4 border-t border-dashed border-stone-100 flex justify-start animate-fade-in"
+        >
+          <!-- Folded Capsule: Expands on hover -->
+          <div
+            class="group/capsule flex items-center bg-stone-50 border border-stone-200 rounded-full p-1 pr-4 transition-all duration-300 ease-out hover:shadow-sm hover:bg-white hover:border-stone-300 cursor-default max-w-[40px] hover:max-w-[400px] overflow-hidden whitespace-nowrap"
+          >
+            <!-- Icon Trigger -->
+            <div
+              class="w-8 h-8 rounded-full bg-white border border-stone-100 flex items-center justify-center shrink-0 text-stone-400 group-hover/capsule:text-stone-600 group-hover/capsule:border-stone-200"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+
+            <!-- Action Buttons (Revealed on Hover) -->
+            <div
+              class="flex items-center gap-2 ml-3 opacity-0 group-hover/capsule:opacity-100 transition-opacity duration-300 delay-75"
+            >
+              <button
+                v-for="action in stageActions"
+                :key="action.label"
+                @click.stop="action.handler"
+                class="flex items-center gap-1.5 px-3 py-1 text-xs font-bold text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-md transition-colors"
+              >
+                <span>{{ action.icon }}</span>
+                <span>{{ action.label }}</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- 展开详情区域 -->
-    <div 
-      class="bg-stone-50/50 border-t border-stone-100 transition-all duration-500 ease-in-out origin-top"
-      :style="{ maxHeight: expanded ? '800px' : '0px', opacity: expanded ? 1 : 0 }"
+    <!-- Detailed View (Expandable) -->
+    <div
+      v-if="expanded"
+      class="bg-stone-50/50 border-t border-stone-100 animate-slide-down rounded-b-2xl overflow-hidden relative"
     >
-      <div class="p-6 relative">
+      <!-- Auto-save Feedback -->
+      <div
+        v-if="saveStatus"
+        class="absolute top-4 right-4 z-20 flex items-center gap-1.5 bg-white/80 backdrop-blur px-2 py-1 rounded-md shadow-sm border border-stone-100 transition-opacity duration-500"
+        :class="saveStatus.visible ? 'opacity-100' : 'opacity-0'"
+      >
+        <span v-if="saveStatus.type === 'success'" class="text-emerald-500">✔</span>
+        <span v-else class="text-amber-500">⚠</span>
+        <span class="text-[10px] font-medium text-stone-600">{{ saveStatus.msg }}</span>
+      </div>
+
+      <!-- If a specific node is selected, show Node Details -->
+      <div v-if="selectedNode" class="p-6 relative">
         <div class="absolute inset-0 bg-paper-texture opacity-20 pointer-events-none"></div>
-        
-        <div class="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <!-- 左侧：职位 JD 与 备注 -->
-          <div class="lg:col-span-2 space-y-6">
-            <div>
-              <h4 class="text-xs font-bold text-stone-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                职位详情 (JD)
-              </h4>
-              <div class="text-sm text-stone-600 leading-relaxed whitespace-pre-line bg-white p-4 rounded-lg border border-stone-100 shadow-sm">
-                {{ job.description || '暂无职位描述...' }}
+
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-sm font-bold text-stone-800 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-stone-800"></span>
+            {{ selectedNode.stage }} 详情
+          </h3>
+          <button @click="selectedNode = null" class="text-xs text-stone-400 hover:text-stone-600">返回概览</button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Left: Input / Info -->
+          <div class="space-y-4">
+            <!-- Time Info -->
+            <div class="bg-white p-3 rounded-xl border border-stone-200 shadow-sm flex items-center justify-between">
+              <div>
+                <div class="text-[10px] text-stone-400 uppercase font-bold">时间</div>
+                <div class="text-sm font-bold text-stone-800">{{ selectedNode.date || '待定' }}</div>
+              </div>
+              <div
+                v-if="!selectedNode.completed"
+                class="text-xs font-medium text-amber-500 bg-amber-50 px-2 py-1 rounded"
+              >
+                进行中
               </div>
             </div>
-            
-            <div v-if="job.notes" class="p-4 bg-yellow-50 border border-yellow-100 rounded-lg rotate-0 shadow-sm relative overflow-hidden">
-              <div class="absolute top-0 right-0 w-4 h-4 bg-yellow-200/50 -mr-2 -mt-2 rotate-45"></div>
-              <h4 class="text-xs font-bold text-yellow-600/70 uppercase tracking-wider mb-1">我的备注</h4>
-              <p class="text-sm text-stone-600 font-handwriting">{{ job.notes }}</p>
+
+            <!-- Form Fields -->
+            <div class="space-y-3">
+              <div>
+                <label class="text-[10px] font-bold text-stone-500 uppercase mb-1 block">面试官 / 联系人</label>
+                <input
+                  type="text"
+                  class="input-field"
+                  placeholder="姓名/职位..."
+                  :value="selectedNode.interviewer"
+                  @input="markDirty"
+                  @blur="autoSave"
+                />
+              </div>
+              <div>
+                <label class="text-[10px] font-bold text-stone-500 uppercase mb-1 block">面试形式</label>
+                <select class="input-field" @change="markDirty" @blur="autoSave">
+                  <option>线上会议</option>
+                  <option>现场面试</option>
+                  <option>电话面试</option>
+                </select>
+              </div>
+              <div>
+                <label class="text-[10px] font-bold text-stone-500 uppercase mb-1 block">面试题记录 / 备注</label>
+                <textarea
+                  class="input-field h-32 resize-none"
+                  placeholder="记录被问到的核心问题..."
+                  @input="markDirty"
+                  @blur="autoSave"
+                ></textarea>
+              </div>
             </div>
           </div>
 
-          <!-- 右侧：面试、联系人、文件 -->
-          <div class="space-y-6">
-            <!-- 下一次面试 (详情页重复显示，保持信息完整性) -->
-            <div v-if="job.nextInterview">
-              <h4 class="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2">日程安排</h4>
-              <div class="flex items-start gap-3 p-3 bg-amber-50/50 border border-amber-100 rounded-lg shadow-sm">
-                <div class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 shrink-0">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <div>
-                  <div class="text-sm font-bold text-stone-800">{{ job.nextInterview }}</div>
-                  <div class="text-xs text-stone-500 mt-0.5">请提前准备简历与作品集</div>
-                </div>
+          <!-- Right: AI Analysis -->
+          <div class="space-y-4">
+            <div class="bg-indigo-50/50 border border-indigo-100 rounded-xl p-4 relative overflow-hidden">
+              <div class="flex items-center gap-2 mb-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-4 w-4 text-indigo-500"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                <span class="text-xs font-bold text-indigo-600">AI 自动总结 & 建议</span>
               </div>
-            </div>
-            
-            <!-- 联系人 -->
-            <div v-if="job.contacts && job.contacts.length > 0">
-               <h4 class="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2">联系人</h4>
-               <div class="space-y-2">
-                 <div v-for="(contact, idx) in job.contacts" :key="idx" class="flex items-center gap-3 p-2 bg-white rounded-lg border border-stone-100">
-                    <div class="w-8 h-8 rounded-full bg-stone-200 flex items-center justify-center text-xs font-bold text-stone-500">
-                      {{ contact.name[0] }}
-                    </div>
-                    <div class="overflow-hidden">
-                      <div class="text-sm font-medium text-stone-700 truncate">{{ contact.name }}</div>
-                      <div class="text-xs text-stone-400 truncate">{{ contact.role || 'HR / Recruiter' }}</div>
-                    </div>
-                 </div>
-               </div>
-            </div>
-
-            <!-- 文件附件 -->
-            <div>
-              <h4 class="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2 flex items-center justify-between">
-                <span>相关文件</span>
-                <button class="text-stone-400 hover:text-stone-600 transition-colors">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                  </svg>
-                </button>
-              </h4>
               <div class="space-y-2">
-                <div v-if="job.files && job.files.length > 0">
-                  <div v-for="(file, idx) in job.files" :key="idx" class="flex items-center justify-between p-2 bg-stone-100/50 rounded border border-stone-200/50 text-xs">
-                    <span class="text-stone-600 truncate max-w-[120px]">{{ file.name }}</span>
-                    <span class="text-stone-400">{{ file.size }}</span>
-                  </div>
-                </div>
-                <div v-else class="text-xs text-stone-400 italic text-center py-2 bg-stone-50 rounded border border-dashed border-stone-200">
-                  暂无附件
-                </div>
+                <p class="text-xs text-stone-600 leading-relaxed">
+                  <span class="font-bold">复盘建议：</span>根据记录，暂无数据可分析。填写面试题后可生成建议。
+                </p>
               </div>
             </div>
 
+            <!-- Self Score -->
+            <div class="bg-white p-4 rounded-xl border border-stone-100 shadow-sm">
+              <div class="text-[10px] font-bold text-stone-400 uppercase mb-2">自我评分</div>
+              <div class="flex gap-1">
+                <button
+                  v-for="i in 10"
+                  :key="i"
+                  class="w-6 h-6 rounded hover:bg-stone-100 text-xs font-medium text-stone-400 border border-transparent hover:border-stone-200 transition-all"
+                >
+                  {{ i }}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-        
-        <!-- 收起按钮 -->
-        <div class="mt-8 flex justify-center border-t border-stone-100 pt-4">
-          <button 
-            @click.stop="toggleExpand"
-            class="text-xs text-stone-400 hover:text-stone-600 flex items-center gap-1 transition-colors px-4 py-2 hover:bg-stone-100 rounded-full"
+      </div>
+
+      <!-- General Job Info (Default Expanded View) -->
+      <div v-else class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6 relative">
+        <div class="absolute inset-0 bg-paper-texture opacity-20 pointer-events-none"></div>
+
+        <div class="lg:col-span-2 space-y-4">
+          <div>
+            <h4 class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-2">职位详情</h4>
+            <p class="text-xs text-stone-600 leading-relaxed bg-white p-4 rounded-xl border border-stone-100">
+              {{ job.description || '暂无描述...' }}
+            </p>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <div v-if="job.aiInsight">
+            <h4 class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-2">AI 洞察</h4>
+            <div class="bg-stone-100 rounded-xl p-3 text-xs text-stone-600">
+              {{ job.aiInsight.nextAction }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Explicit Save & Collapse Actions -->
+      <div class="p-4 border-t border-stone-200 bg-white flex justify-between items-center">
+        <button
+          @click="attemptCollapse"
+          class="px-4 py-2 text-xs font-bold text-stone-500 hover:bg-stone-50 rounded-lg transition-colors"
+        >
+          收起面板
+        </button>
+        <button
+          @click="manualSave"
+          class="px-5 py-2 bg-stone-900 text-white text-xs font-bold rounded-lg hover:bg-stone-800 shadow-md active:scale-95 transition-all flex items-center gap-2"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+            <path
+              d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293z"
+            />
+          </svg>
+          保存记录
+        </button>
+      </div>
+    </div>
+
+    <!-- Unsaved Changes Dialog -->
+    <div
+      v-if="showUnsavedDialog"
+      class="absolute inset-0 z-30 bg-white/90 backdrop-blur-sm flex items-center justify-center rounded-2xl p-6 animate-fade-in"
+    >
+      <div class="bg-white border border-stone-200 shadow-xl rounded-xl p-6 max-w-xs text-center">
+        <h4 class="font-bold text-stone-800 mb-2">是否保存更改？</h4>
+        <p class="text-xs text-stone-500 mb-4">你刚才修改的内容尚未保存到云端。</p>
+        <div class="flex gap-2 justify-center">
+          <button
+            @click="discardAndClose"
+            class="px-3 py-2 text-xs font-medium text-stone-500 hover:bg-stone-50 rounded-lg"
           >
-            <span>收起详情</span>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-            </svg>
+            不保存
+          </button>
+          <button
+            @click="saveAndClose"
+            class="px-4 py-2 bg-stone-900 text-white text-xs font-bold rounded-lg shadow-md hover:bg-stone-800"
+          >
+            保存并收起
           </button>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- Modals -->
+  <ScheduleModal v-model="showScheduleModal" @save="handleScheduleSave" />
+  <ReviewModal v-model="showReviewModal" :job="job" @save="handleReviewSave" />
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import type { JobApplication } from '../types'
+import { ref, computed } from 'vue'
+import type { JobApplication, TimelineNode } from '../types'
 import StatusBadge from './StatusBadge.vue'
 import JobProgressBar from './JobProgressBar.vue'
 import PriorityBadge from './PriorityBadge.vue'
+import ScheduleModal from './ScheduleModal.vue'
+import ReviewModal from './ReviewModal.vue'
 
 const props = defineProps<{
   job: JobApplication
 }>()
 
-const expanded = ref(false)
+const emit = defineEmits(['update:status', 'update:job'])
 
+// State
+const expanded = ref(false)
+const selectedNode = ref<TimelineNode | null>(null)
+const isDirty = ref(false)
+const showUnsavedDialog = ref(false)
+const showScheduleModal = ref(false)
+const showReviewModal = ref(false)
+
+// Auto-save Feedback State
+const saveStatus = ref<{ visible: boolean; type: 'success' | 'error'; msg: string } | null>(null)
+
+// Dynamic Actions based on Stage
+const stageActions = computed(() => {
+  const actions: { label: string; icon: string; handler: () => void }[] = []
+  const currentTimelineNode = props.job.timeline.find((n) => n.current)
+
+  if (props.job.currentMainStage === 'Applied') {
+    actions.push({ label: '添加备注', icon: '✍', handler: toggleExpand })
+    actions.push({ label: '感兴趣', icon: '♥', handler: () => emit('update:status', props.job.id, 'Interested') })
+    actions.push({ label: '导入JD', icon: '⬇', handler: () => console.log('Import JD') })
+    actions.push({ label: '调整优先级', icon: '🏷', handler: () => console.log('Priority') })
+  } else if (props.job.currentMainStage === 'Interview') {
+    // Context-aware: Check if it is 'Screening' (初筛)
+    const isScreening =
+      props.job.currentSubStage === 'screening' || (currentTimelineNode && currentTimelineNode.stage.includes('初筛'))
+
+    if (isScreening) {
+      actions.push({ label: '安排初筛', icon: '📞', handler: openScheduleModal })
+      actions.push({ label: '记录反馈', icon: '📝', handler: toggleExpand })
+    } else {
+      actions.push({ label: '预约面试', icon: '📅', handler: openScheduleModal })
+      actions.push({
+        label: '面试复盘',
+        icon: '⭐',
+        handler: () => {
+          showReviewModal.value = true
+        }
+      })
+      actions.push({ label: '上传材料', icon: '📎', handler: () => console.log('Upload') })
+    }
+  } else if (props.job.currentMainStage === 'Offer') {
+    actions.push({ label: '接受Offer', icon: '🎉', handler: () => emit('update:status', props.job.id, 'Accepted') })
+    actions.push({ label: '谈薪', icon: '💰', handler: toggleExpand })
+    actions.push({ label: '分享Offer', icon: '🔗', handler: () => console.log('Share') })
+    actions.push({ label: '婉拒', icon: '👋', handler: () => emit('update:status', props.job.id, 'Declined') })
+  }
+
+  return actions
+})
+
+// Actions
 const toggleExpand = () => {
-  expanded.value = !expanded.value
+  if (expanded.value) {
+    attemptCollapse()
+  } else {
+    expanded.value = true
+  }
+}
+
+const attemptCollapse = () => {
+  if (isDirty.value) {
+    showUnsavedDialog.value = true
+  } else {
+    expanded.value = false
+    selectedNode.value = null
+  }
+}
+
+const markDirty = () => {
+  isDirty.value = true
+}
+
+const autoSave = () => {
+  if (!isDirty.value) return
+
+  // Mock Async Save
+  setTimeout(() => {
+    isDirty.value = false
+    showSaveFeedback('success', '已自动保存 · 刚刚')
+  }, 800)
+}
+
+const manualSave = () => {
+  // Mock Save
+  isDirty.value = false
+  showSaveFeedback('success', '保存成功')
+}
+
+const showSaveFeedback = (type: 'success' | 'error', msg: string) => {
+  saveStatus.value = { visible: true, type, msg }
+  setTimeout(() => {
+    if (saveStatus.value) saveStatus.value.visible = false
+  }, 3000)
+}
+
+const saveAndClose = () => {
+  manualSave()
+  showUnsavedDialog.value = false
+  expanded.value = false
+}
+
+const discardAndClose = () => {
+  isDirty.value = false
+  showUnsavedDialog.value = false
+  expanded.value = false
+}
+
+const handleNodeClick = (node: TimelineNode) => {
+  selectedNode.value = node
+  if (!expanded.value) {
+    expanded.value = true
+  }
+}
+
+// Schedule Logic
+const openScheduleModal = () => {
+  showScheduleModal.value = true
+}
+
+const handleScheduleSave = () => {
+  // Mock: Update local job data
+  showSaveFeedback('success', '已安排 · 已加入你的日历')
+  // Real world: Emit event to parent to update data store
+}
+
+const handleReviewSave = () => {
+  showSaveFeedback('success', '复盘已提交 · 建议生成中')
+}
+
+const formatCountdown = (dateStr?: string) => {
+  if (!dateStr) return ''
+  // Mock countdown logic
+  return '1天 3小时'
 }
 </script>
+
+<style scoped>
+.input-field {
+  width: 100%;
+  font-size: 0.75rem; /* text-xs */
+  line-height: 1rem;
+  padding: 0.5rem; /* p-2 */
+  border-radius: 0.25rem; /* rounded */
+  border-width: 1px; /* border */
+  border-color: #e7e5e4; /* border-stone-200 */
+  background-color: white; /* bg-white */
+  outline: none; /* outline-none */
+  transition-property:
+    color, background-color, border-color, text-decoration-color, fill, stroke; /* transition-colors */
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+.input-field:focus {
+  border-color: #a8a29e; /* focus:border-stone-400 */
+}
+.animate-slide-down {
+  animation: slide-down 0.3s ease-out forwards;
+}
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out forwards;
+}
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+</style>

@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 
 export interface ResumeSection {
   id: string
@@ -12,12 +12,12 @@ export interface ResumeData {
     name: string
     email: string
     phone: string
-    summary: string // This is the profile summary text
+    summary: string
     location: string
     website: string
-    title: string // Added title/headline
+    title: string
   }
-  sections: ResumeSection[] // Order of sections
+  sections: ResumeSection[]
   education: Array<{
     id: string
     institution: string
@@ -49,6 +49,7 @@ export interface ResumeData {
     level: string
     keywords: string[]
   }>
+  custom: Record<string, string>
 }
 
 const defaultResume: ResumeData = {
@@ -68,6 +69,7 @@ const defaultResume: ResumeData = {
     { id: 'projects', type: 'projects', title: '项目经验', isVisible: true },
     { id: 'skills', type: 'skills', title: '专业技能', isVisible: true }
   ],
+  custom: {},
   education: [
     {
       id: '1',
@@ -87,7 +89,11 @@ const defaultResume: ResumeData = {
       startDate: '2019-07',
       endDate: '至今',
       summary: '负责公司核心产品的前端架构设计与开发。',
-      highlights: ['主导了项目重构，提升了50%的页面加载速度', '开发了通用的组件库', '引入自动化测试流程，减少了30%的线上Bug']
+      highlights: [
+        '主导了项目重构，提升了50%的页面加载速度',
+        '开发了通用的组件库',
+        '引入自动化测试流程，减少了30%的线上Bug'
+      ]
     }
   ],
   projects: [
@@ -115,48 +121,121 @@ const defaultResume: ResumeData = {
   ]
 }
 
+// History management
+const HISTORY_LIMIT = 20
+
 export const useResume = () => {
   const resumeData = ref<ResumeData>(JSON.parse(JSON.stringify(defaultResume)))
+
+  // Undo/Redo State
+  const history = ref<string[]>([JSON.stringify(defaultResume)])
+  const historyIndex = ref(0)
+  const isUndoing = ref(false)
+
+  watch(
+    resumeData,
+    (newVal) => {
+      if (isUndoing.value) return
+
+      const snapshot = JSON.stringify(newVal)
+      if (snapshot === history.value[historyIndex.value]) return
+
+      if (historyIndex.value < history.value.length - 1) {
+        history.value = history.value.slice(0, historyIndex.value + 1)
+      }
+
+      history.value.push(snapshot)
+      if (history.value.length > HISTORY_LIMIT) {
+        history.value.shift()
+      } else {
+        historyIndex.value++
+      }
+    },
+    { deep: true }
+  )
+
+  const undo = () => {
+    if (historyIndex.value > 0) {
+      isUndoing.value = true
+      historyIndex.value--
+      resumeData.value = JSON.parse(history.value[historyIndex.value])
+      setTimeout(() => {
+        isUndoing.value = false
+      }, 0)
+    }
+  }
+
+  const redo = () => {
+    if (historyIndex.value < history.value.length - 1) {
+      isUndoing.value = true
+      historyIndex.value++
+      resumeData.value = JSON.parse(history.value[historyIndex.value])
+      setTimeout(() => {
+        isUndoing.value = false
+      }, 0)
+    }
+  }
 
   const updateBasics = (key: keyof ResumeData['basics'], value: string) => {
     resumeData.value.basics[key] = value
   }
-  
+
   const addSection = (type: ResumeSection['type'], title: string) => {
-     const id = type + '-' + Date.now()
-     resumeData.value.sections.push({
-         id,
-         type,
-         title,
-         isVisible: true
-     })
+    const id = type + '-' + Date.now()
+    resumeData.value.sections.push({
+      id,
+      type,
+      title,
+      isVisible: true
+    })
+    
+    if (type === 'custom') {
+      if (!resumeData.value.custom) resumeData.value.custom = {}
+      resumeData.value.custom[id] = ''
+    }
   }
 
   const removeSection = (id: string) => {
-      const index = resumeData.value.sections.findIndex(s => s.id === id)
-      if (index !== -1) {
-          resumeData.value.sections.splice(index, 1)
-      }
+    const index = resumeData.value.sections.findIndex((s) => s.id === id)
+    if (index !== -1) {
+      resumeData.value.sections.splice(index, 1)
+    }
   }
 
   // Helper to add items to arrays (education, work, etc)
   const addItem = (key: 'education' | 'work' | 'projects' | 'skills') => {
-      const id = Date.now().toString()
-      if (key === 'education') {
-          resumeData.value.education.push({ id, institution: '', area: '', studyType: '', startDate: '', endDate: '', score: '' })
-      } else if (key === 'work') {
-          resumeData.value.work.push({ id, company: '', position: '', startDate: '', endDate: '', summary: '', highlights: [] })
-      } else if (key === 'projects') {
-          resumeData.value.projects.push({ id, name: '', description: '', keywords: [], url: '' })
-      } else if (key === 'skills') {
-          resumeData.value.skills.push({ id, name: '', level: '', keywords: [] })
-      }
+    const id = Date.now().toString()
+    if (key === 'education') {
+      resumeData.value.education.push({
+        id,
+        institution: '',
+        area: '',
+        studyType: '',
+        startDate: '',
+        endDate: '',
+        score: ''
+      })
+    } else if (key === 'work') {
+      resumeData.value.work.push({
+        id,
+        company: '',
+        position: '',
+        startDate: '',
+        endDate: '',
+        summary: '',
+        highlights: []
+      })
+    } else if (key === 'projects') {
+      resumeData.value.projects.push({ id, name: '', description: '', keywords: [], url: '' })
+    } else if (key === 'skills') {
+      resumeData.value.skills.push({ id, name: '', level: '', keywords: [] })
+    }
   }
 
   const removeItem = (key: 'education' | 'work' | 'projects' | 'skills', id: string) => {
-      const arr = resumeData.value[key] as any[]
-      const index = arr.findIndex(item => item.id === id)
-      if (index !== -1) arr.splice(index, 1)
+    const arr = resumeData.value[key] as Array<{ id: string }>
+    const index = arr.findIndex((item) => item.id === id)
+    if (index !== -1) arr.splice(index, 1)
   }
 
   return {
@@ -165,6 +244,10 @@ export const useResume = () => {
     addSection,
     removeSection,
     addItem,
-    removeItem
+    removeItem,
+    undo,
+    redo,
+    canUndo: () => historyIndex.value > 0,
+    canRedo: () => historyIndex.value < history.value.length - 1
   }
 }

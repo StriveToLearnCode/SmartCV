@@ -40,9 +40,14 @@
         <SmartBoard />
       </template>
 
-      <!-- Job Progress View -->
+      <!-- Job Progress -->
       <template v-else-if="currentTab === 'progress'">
         <JobProgressView />
+      </template>
+
+      <!-- AI Suggestion -->
+      <template v-else-if="currentTab === 'suggestion'">
+        <AiSuggestionView />
       </template>
 
       <!-- Other Views (Placeholders for Navigation) -->
@@ -84,7 +89,7 @@ import AIChat from './_components/AIChat.vue'
 import SmartBoard from './_components/SmartBoard.vue'
 import FloatingCapsule from './_components/FloatingCapsule.vue'
 import JobProgressView from '../(jobProgress)/layout.vue'
-
+import AiSuggestionView from '../(aiSuggestion)/layout.vue'
 const currentTab = ref('overview')
 
 const tabNameMap: Record<string, string> = {

@@ -94,6 +94,9 @@
 import { ref, computed } from 'vue'
 import { Motion } from 'motion-v'
 
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 const prompt = ref('')
 const isFocused = ref(false)
 const fullText = '在这里输入你的想法，AI 将帮你完善简历...'
@@ -113,5 +116,6 @@ const sendMessage = () => {
   console.log('Sending:', prompt.value)
   prompt.value = ''
   isFocused.value = false
+  router.push('/edit')
 }
 </script>

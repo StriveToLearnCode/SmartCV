@@ -1,9 +1,22 @@
 <script setup lang="ts">
 import { type ResumeData } from '../composables/useResume'
 
-defineProps<{
+const props = defineProps<{
   resume: ResumeData
+  highlightKeywords?: string[]
 }>()
+
+const highlightText = (text: string) => {
+  if (!text) return ''
+  if (!props.highlightKeywords || props.highlightKeywords.length === 0) return text
+  
+  // Simple keyword matching - in production use a robust highlighter to handle overlaps/html
+  const escapedKeywords = props.highlightKeywords.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+  if (escapedKeywords.length === 0) return text
+  
+  const pattern = new RegExp(`(${escapedKeywords.join('|')})`, 'gi')
+  return text.replace(pattern, '<span class="bg-yellow-200/50 border-b border-amber-300/50 font-medium text-stone-900 px-0.5 rounded-sm">$1</span>')
+}
 </script>
 
 <template>
@@ -45,9 +58,10 @@ defineProps<{
             </h2>
 
             <!-- Summary -->
-            <div v-if="section.type === 'summary'" class="text-stone-700 leading-loose font-serif text-sm text-justify">
-               {{ resume.basics.summary }}
-            </div>
+            <div v-if="section.type === 'summary'" 
+              class="text-stone-700 leading-loose font-serif text-sm text-justify"
+              v-html="highlightText(resume.basics.summary)"
+            ></div>
 
             <!-- Education -->
             <div v-if="section.type === 'education'" class="space-y-6">
@@ -71,13 +85,17 @@ defineProps<{
                   <span class="text-stone-500 text-sm font-serif italic tabular-nums">{{ job.startDate }} - {{ job.endDate }}</span>
                 </div>
                 <div class="text-stone-800 font-medium text-sm mb-3 italic">{{ job.position }}</div>
-                <p v-if="job.summary" class="text-stone-700 text-sm leading-relaxed font-serif mb-3 text-justify">{{ job.summary }}</p>
+                <p v-if="job.summary" 
+                   class="text-stone-700 text-sm leading-relaxed font-serif mb-3 text-justify"
+                   v-html="highlightText(job.summary)"
+                ></p>
                 <ul class="list-disc list-outside ml-4 space-y-1.5" v-if="job.highlights && job.highlights.length">
-                  <li v-for="(highlight, index) in job.highlights" :key="index" class="text-stone-600 text-sm font-serif pl-1 leading-relaxed">
-                    {{ highlight }}
-                  </li>
+                  <li v-for="(highlight, index) in job.highlights" :key="index" 
+                      class="text-stone-600 text-sm font-serif pl-1 leading-relaxed"
+                      v-html="highlightText(highlight)"
+                  ></li>
                 </ul>
-              </div>
+               </div>
             </div>
 
             <!-- Projects -->
@@ -87,11 +105,15 @@ defineProps<{
                     <h3 class="font-bold text-stone-900 text-base tracking-wide">{{ project.name }}</h3>
                     <a v-if="project.url" :href="project.url" target="_blank" class="text-stone-400 hover:text-stone-600 text-xs underline decoration-stone-300 underline-offset-4">Project Link ↗</a>
                   </div>
-                  <p class="text-stone-700 text-sm leading-relaxed font-serif mb-3 text-justify">{{ project.description }}</p>
+                  <p 
+                     class="text-stone-700 text-sm leading-relaxed font-serif mb-3 text-justify"
+                     v-html="highlightText(project.description)"
+                  ></p>
                   <div class="flex gap-2 flex-wrap" v-if="project.keywords && project.keywords.length">
-                    <span v-for="keyword in project.keywords" :key="keyword" class="px-2 py-0.5 bg-stone-100 text-stone-500 text-xs rounded-sm border border-stone-200 font-mono">
-                      {{ keyword }}
-                    </span>
+                    <span v-for="keyword in project.keywords" :key="keyword" 
+                          class="px-2 py-0.5 bg-stone-100 text-stone-500 text-xs rounded-sm border border-stone-200 font-mono"
+                          v-html="highlightText(keyword)"
+                    ></span>
                   </div>
                </div>
             </div>
@@ -102,13 +124,22 @@ defineProps<{
                 <div v-for="skill in resume.skills" :key="skill.id" class="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-4">
                   <span class="font-bold text-stone-800 text-sm w-24 shrink-0 pt-0.5">{{ skill.name }}</span>
                   <div class="flex flex-wrap gap-x-4 gap-y-2 flex-1">
-                    <span v-for="kw in skill.keywords" :key="kw" class="text-stone-600 text-sm font-serif relative after:content-['•'] after:absolute after:-right-3 after:text-stone-300 last:after:content-none mr-1">
-                      {{ kw }}
-                    </span>
+                    <span v-for="kw in skill.keywords" :key="kw" 
+                          class="text-stone-600 text-sm font-serif relative after:content-['•'] after:absolute after:-right-3 after:text-stone-300 last:after:content-none mr-1"
+                          v-html="highlightText(kw)"
+                    ></span>
                   </div>
                 </div>
               </div>
             </div>
+            
+            <!-- Custom -->
+             <div v-if="section.type === 'custom'" class="space-y-6">
+               <p class="text-stone-700 text-sm leading-relaxed font-serif text-justify whitespace-pre-wrap" 
+                  v-if="resume.custom && resume.custom[section.id]"
+                  v-html="highlightText(resume.custom[section.id])"
+               ></p>
+             </div>
 
           </div>
         </template>

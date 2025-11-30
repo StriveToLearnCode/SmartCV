@@ -21,12 +21,12 @@
 </template>
 
 <script setup lang="ts">
-import Navbar from './components/Navbar.vue'
+import Navbar from './_components/Navbar.vue'
 import HeroSection from './sections/HeroSection.vue'
 import FeatureSection from './sections/FeatureSection.vue'
 import TemplateSection from './sections/TemplateSection.vue'
 import DashboardSection from './sections/DashboardSection.vue'
-import AppFooter from './components/AppFooter.vue'
+import AppFooter from './_components/AppFooter.vue'
 </script>
 
 <style>
