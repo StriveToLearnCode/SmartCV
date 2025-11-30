@@ -1,0 +1,77 @@
+/* Paper Texture & Micro-interactions */
+
+/* 1. 纸纤维颗粒淡入 (Paper Texture) */
+.bg-paper-texture {
+  background-color: #ffffff;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+}
+
+/* 2. 手写风格边框 (Sketch Border Jitter) */
+.sketch-border {
+  position: relative;
+  border: 2px solid transparent;
+}
+
+.sketch-border::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border: 1.5px solid #57534e; /* stone-600 */
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  mask-image: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='0' y='0' width='100%25' height='100%25' fill='black'/%3E%3C/svg%3E");
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.sketch-border:hover::before {
+  border-color: #292524; /* stone-800 */
+  transform: scale(1.02) rotate(0.5deg);
+}
+
+.sketch-border:active::before {
+  transform: scale(0.98) rotate(-0.5deg);
+  border-width: 2px;
+}
+
+/* 3. 墨水显影 (Ink Developing) - Base styles, animation handled by Motion */
+.ink-text-word {
+  display: inline-block;
+  will-change: opacity, filter, transform;
+}
+
+/* 4. 导航手写下划线 (Handwriting Underline) */
+.nav-link-underline {
+  position: relative;
+}
+
+.nav-link-underline::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 100%;
+  height: 2px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Wiggle path SVG background could be here, but simple line is cleaner for now, 
+     or use clip-path for rough edges */
+  clip-path: polygon(0 0, 100% 1px, 98% 100%, 2% 98%);
+}
+
+.nav-link-underline:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* 5. 呼吸感光晕 (Breathing Glow) - refined */
+@keyframes breathe-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(120, 113, 108, 0); }
+  50% { box-shadow: 0 0 20px 2px rgba(120, 113, 108, 0.1); }
+}
+
+.animate-breathe-glow {
+  animation: breathe-glow 5s ease-in-out infinite;
+}

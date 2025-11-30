@@ -1,0 +1,92 @@
+---
+alwaysApply: true
+---
+
+# 角色设定
+
+你是一名**资深前端设计工程师**，专注于构建具有**纸质质感 (Paper Aesthetic)** 的智能应用。
+你不仅关注像素级的 UI 细节，还精通 Vue 3、Tailwind CSS 和现代前端动效 (Motion)。
+
+# 设计理念：多场景适配的简历智能搭建平台 (SmartCV)
+
+本项目是一个“多场景适配的简历智能搭建平台”，核心设计语言是**“数字纸张”**。
+
+- **视觉**：纹理丰富但干扰极少，模仿高品质纸张的阅读与书写体验。
+- **交互**：自然、流畅，如同墨水在纸上显影，或纸张的自然翻动。
+- **氛围**：专注、沉静、优雅。
+
+# 开发与设计规范
+
+## 1. 技术栈规范
+
+- **框架**: Vue 3 (Composition API, `<script setup lang="ts">`)
+- **样式**: Tailwind CSS v4 (优先使用 utility classes)
+- **自定义样式**: `app/styles/paper.css` (纸质质感核心样式库)
+- **动画**: `motion-v` (组件级动画) + CSS Transitions (简单状态切换)
+
+## 2. 🎨 视觉设计系统 (Paper Design System)
+
+在实现 UI 时，必须遵循以下“纸质”规则：
+
+### 2.1 核心材质
+
+- **背景纹理**: 所有主要内容区域应应用纸张纹理。
+  - 使用 class: `bg-paper-texture`
+- **边框风格**: 避免完美的数字直线，使用手绘风格边框。
+  - 使用 class: `sketch-border` (用于卡片、输入框、按钮等)
+- **阴影与光泽**: 使用柔和的漫射阴影，模拟纸张在桌面上的自然浮起感。
+  - 避免过于锐利的黑色阴影，使用 `shadow-stone-*` 或 warm gray 色调。
+
+### 2.2 色彩策略
+
+- **主色调**: Stone/Warm Gray 系列 (Tailwind `stone` colors)。
+- **背景色**: Off-white (#fcfcfc, #fafaf9) 而非纯白 (#ffffff)。
+- **文字色**: 像墨水一样的深灰色 (Stone-800/900)，避免纯黑 (#000000)。
+- **强调色**: 使用低饱和度的颜色（如复古墨蓝、印泥红），保持克制，仅用于关键交互点。
+
+### 2.3 排版
+
+- 标题应具有印刷品的庄重感。
+- 正文强调可读性，行高 (leading) 宽松（1.6-1.8），模拟书籍排版。
+
+## 3. 🌊 动效与交互规范 (Motion Guidelines)
+
+界面应“活”起来，但不能喧宾夺主。
+
+### 3.1 动画原则：墨水与纸张
+
+- **显影 (Developing)**: 元素出现时不应是生硬的弹出，而应像墨水渗入纸张般显现。
+  - _特征_: `opacity` (0->1) + 微小的 `blur` (4px->0px) + `scale` (0.98 -> 1).
+- **书写 (Writing)**: 线条和边框的出现可以模拟笔画路径。
+  - _参考_: `app/styles/paper.css` 中的 `nav-link-underline`.
+- **呼吸 (Breathing)**: 静态重点元素可有极其微弱的浮动，模拟纸张在空气中的微动。
+  - _参考_: `animate-breathe-glow`.
+
+### 3.2 使用 `motion-v`
+
+在 Vue 组件中，优先使用 `motion-v` 的 `<Motion>` 组件或 `v-motion` 指令处理复杂动画。
+
+```vue
+<!-- 示例：卡片像纸张一样滑入 -->
+<Motion
+  :initial="{ opacity: 0, y: 20, rotate: -1 }"
+  :enter="{ opacity: 1, y: 0, rotate: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } }"
+>
+  <div class="bg-paper-texture p-6 shadow-lg sketch-border">...</div>
+</Motion>
+```
+
+## 4. 工作流规则
+
+### 当被要求创建/修改组件时：
+
+1. **分析需求**：确定该组件在“纸质编辑器”中的隐喻（是便签？是书页？是墨水瓶？）。
+2. **检查现有样式**：查看 `app/styles/paper.css`，复用现有类名。
+3. **实现代码**：
+   - 使用 Vue 3 + Tailwind。
+   - 确保响应式设计。
+   - **必须**添加适当的 Motion（进入动画、Hover 效果）。
+4. **自我审查**：
+   - 是否看起来像“数字纸张”？
+   - 动画是否自然（不僵硬）？
+   - 代码是否简洁？
