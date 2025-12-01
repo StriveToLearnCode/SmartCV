@@ -3,12 +3,26 @@ import { ref, nextTick } from 'vue'
 import { VueDraggable } from 'vue-draggable-plus'
 import { type ResumeData, useResume } from '../composables/useResume'
 import StarGuide from './StarGuide.vue'
+import { useAutoSave } from '../../composables/useAutoSave'
+import SaveStatusSticker from '../../components/SaveStatusSticker.vue'
 
 defineProps<{
   resume: ResumeData
 }>()
 
 const { addItem, removeItem, addSection } = useResume()
+const { status: saveStatus, triggerSave, timeAgo, lastSavedTime } = useAutoSave()
+
+const handleFocusOut = (e: FocusEvent) => {
+  const target = e.target as HTMLElement
+  if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+    triggerSave(async () => {
+      // Mock Save
+      await new Promise(resolve => setTimeout(resolve, 800))
+    })
+  }
+}
+
 
 // State for STAR guide
 const activeStarGuide = ref<string | null>(null) // Format: 'type-id' e.g., 'work-1'
@@ -67,6 +81,14 @@ const updateKeywords = (skill: any, event: Event) => {
   skill.keywords = target.value.split(',').map((s) => s.trim())
 }
 
+const handleAddItem = (type: 'education' | 'work' | 'projects' | 'skills') => {
+  const id = addItem(type)
+  if (type === 'work' || type === 'projects') {
+    // 自动开启 STAR 引导
+    activeStarGuide.value = `${type}-${id}`
+  }
+}
+
 // Components
 const InputField = {
   props: ['label', 'modelValue', 'type', 'placeholder'],
@@ -104,7 +126,19 @@ const TextAreaField = {
 </script>
 
 <template>
-  <div class="h-full overflow-y-auto p-6 pb-32 space-y-6 scrollbar-hide">
+  <div class="h-full overflow-y-auto p-6 pb-32 space-y-6 scrollbar-hide" @focusout="handleFocusOut">
+    <!-- Save Status Sticker (Sticky) -->
+    <div class="sticky top-0 z-20 flex justify-end pointer-events-none h-0 overflow-visible">
+      <div class="pointer-events-auto transform -translate-y-2 translate-x-2">
+        <SaveStatusSticker 
+          :status="saveStatus" 
+          :timeAgo="timeAgo" 
+          :lastSavedTime="lastSavedTime"
+          @retry="triggerSave(async () => await new Promise(r => setTimeout(r, 800)))"
+        />
+      </div>
+    </div>
+
     <!-- 固定：基本信息 -->
     <div
       class="bg-[#fbfbf9] rounded-sm shadow-[1px_2px_4px_rgba(0,0,0,0.06)] border border-stone-200 overflow-hidden group hover:shadow-[2px_4px_8px_rgba(0,0,0,0.08)] transition-all duration-300 transform hover:-rotate-[0.5deg]"
@@ -160,7 +194,7 @@ const TextAreaField = {
       handle=".drag-handle"
       class="space-y-6"
       ghost-class="ghost-card"
-      :drag-class="'opacity-50'"
+      drag-class="paper-twist-drag"
     >
       <div
         v-for="section in resume.sections"
@@ -223,8 +257,22 @@ const TextAreaField = {
             </div>
           </div>
 
-          <div class="flex items-center gap-1">
-            <!-- 开关/显示隐藏 -->
+            <!-- 风格选择 (Only for Skills for now) -->
+            <div v-if="section.type === 'skills'" class="ml-auto mr-3">
+              <select 
+                v-model="section.variant" 
+                class="text-[10px] font-bold text-stone-500 bg-transparent border-b border-stone-200 hover:border-stone-400 focus:outline-none transition-colors cursor-pointer uppercase"
+                @click.stop
+              >
+                <option value="list">列表</option>
+                <option value="matrix">矩阵</option>
+                <option value="cloud">标签云</option>
+                <option value="icons">图标墙</option>
+              </select>
+            </div>
+
+            <div class="flex items-center gap-1">
+              <!-- 开关/显示隐藏 -->
             <button
               @click="section.isVisible = !section.isVisible"
               class="text-stone-300 hover:text-stone-600 p-1.5 rounded-md hover:bg-stone-100 transition-all"
@@ -338,7 +386,7 @@ const TextAreaField = {
               <InputField label="成绩/荣誉" v-model="edu.score" placeholder="GPA 3.8, 优秀毕业生..." />
             </div>
             <button
-              @click="addItem('education')"
+              @click="handleAddItem('education')"
               class="w-full py-3 border border-dashed border-stone-300 rounded-lg text-stone-500 hover:bg-stone-50 hover:text-stone-700 hover:border-stone-400 text-xs font-bold tracking-wider uppercase transition-all flex items-center justify-center gap-2"
             >
               <svg
@@ -427,7 +475,7 @@ const TextAreaField = {
               </div>
             </div>
             <button
-              @click="addItem('work')"
+              @click="handleAddItem('work')"
               class="w-full py-3 border border-dashed border-stone-300 rounded-lg text-stone-500 hover:bg-stone-50 hover:text-stone-700 hover:border-stone-400 text-xs font-bold tracking-wider uppercase transition-all flex items-center justify-center gap-2"
             >
               <svg
@@ -511,7 +559,7 @@ const TextAreaField = {
               </div>
             </div>
             <button
-              @click="addItem('projects')"
+              @click="handleAddItem('projects')"
               class="w-full py-3 border border-dashed border-stone-300 rounded-lg text-stone-500 hover:bg-stone-50 hover:text-stone-700 hover:border-stone-400 text-xs font-bold tracking-wider uppercase transition-all flex items-center justify-center gap-2"
             >
               <svg
@@ -582,7 +630,7 @@ const TextAreaField = {
               </button>
             </div>
             <button
-              @click="addItem('skills')"
+              @click="handleAddItem('skills')"
               class="w-full py-2 border border-dashed border-stone-300 rounded-lg text-stone-500 hover:bg-stone-50 text-xs font-bold tracking-wider uppercase transition-colors"
             >
               + 添加技能组
@@ -606,7 +654,7 @@ const TextAreaField = {
     <div class="grid grid-cols-2 gap-3 pt-4 border-t border-stone-200 border-dashed">
       <p class="col-span-2 text-[10px] uppercase tracking-widest text-center text-stone-400 mb-1">更多模块</p>
       <button
-        @click="addSection('custom', '自定义模块')"
+        @click="addSection('custom', '我的新模块')"
         class="py-3 px-3 bg-[#fbfbf9] border border-stone-200 rounded-xl text-stone-600 text-xs hover:border-stone-400 transition-all shadow-sm hover:shadow flex items-center justify-center gap-2 group hover:-rotate-1"
       >
         <span
@@ -616,13 +664,14 @@ const TextAreaField = {
         自定义模块
       </button>
       <button
+        @click="addSection('custom', '实习/开发日志')"
         class="py-3 px-3 bg-[#fbfbf9] border border-stone-200 rounded-xl text-stone-600 text-xs hover:border-stone-400 transition-all shadow-sm hover:shadow flex items-center justify-center gap-2 group hover:rotate-1"
       >
         <span
           class="w-5 h-5 rounded-full bg-stone-100 flex items-center justify-center group-hover:bg-stone-200 transition-colors text-stone-500"
           >+</span
         >
-        获奖经历
+        实习/日志
       </button>
     </div>
   </div>
@@ -644,5 +693,14 @@ const TextAreaField = {
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+.paper-twist-drag {
+  opacity: 0.9;
+  transform: rotate(2deg) scale(1.02);
+  box-shadow: 8px 12px 20px rgba(0,0,0,0.15);
+  background-color: #fffdf5; /* Warm paper color */
+  border: 1px solid #d6d3d1;
+  cursor: grabbing;
+  z-index: 50;
 }
 </style>

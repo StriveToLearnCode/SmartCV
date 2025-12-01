@@ -1,13 +1,24 @@
 <template>
   <div class="w-full relative select-none">
-    <!-- Main 3-Stage Track -->
-    <div class="relative pt-8 pb-4">
-      <!-- Background Line -->
-      <div class="absolute top-10 left-0 w-full h-1 bg-stone-100 rounded-full"></div>
+    <!-- Cheer Text Area -->
+    <div class="mb-4 px-1 flex items-center gap-2 animate-fade-in">
+      <div class="text-lg">
+        <span v-if="currentCheer.emoji">{{ currentCheer.emoji }}</span>
+        <span v-else>🌱</span>
+      </div>
+      <div class="text-sm text-stone-600 font-serif italic">
+        “{{ currentCheer.text }}”
+      </div>
+    </div>
 
-      <!-- Active Progress Line (Simplified for Main Stages) -->
+    <!-- Main 3-Stage Track -->
+    <div class="relative pb-4">
+      <!-- Background Line -->
+      <div class="absolute top-3 left-0 w-full h-0.5 bg-stone-100"></div>
+
+      <!-- Active Progress Line -->
       <div
-        class="absolute top-10 left-0 h-1 bg-stone-800 transition-all duration-500 rounded-full"
+        class="absolute top-3 left-0 h-0.5 bg-stone-800 transition-all duration-1000 ease-out"
         :style="{ width: `${overallProgress}%` }"
       ></div>
 
@@ -21,71 +32,90 @@
         >
           <!-- Node Dot -->
           <div
-            class="w-5 h-5 rounded-full border-2 bg-white flex items-center justify-center transition-all duration-300 z-10"
+            class="w-6 h-6 rounded-full border-2 bg-white flex items-center justify-center transition-all duration-500 z-10"
             :class="[
               getStageColor(stage.status),
-              activeMainStage === stage.id ? 'scale-125 ring-4 ring-stone-50' : 'group-hover:scale-110'
+              activeMainStage === stage.id ? 'scale-110 ring-2 ring-offset-2 ring-stone-100' : 'group-hover:scale-105'
             ]"
           >
-            <div v-if="stage.status === 'completed'" class="w-2.5 h-2.5 bg-stone-800 rounded-full"></div>
-            <div
-              v-else-if="stage.status === 'active'"
-              class="w-2.5 h-2.5 bg-amber-400 rounded-full animate-pulse"
-            ></div>
+             <div v-if="stage.status === 'completed'" class="text-[10px] text-stone-800 font-bold">✓</div>
+             <div v-else-if="stage.status === 'active'" class="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></div>
           </div>
 
           <!-- Stage Label -->
           <div
-            class="absolute -top-6 text-xs font-bold transition-colors duration-300 text-center uppercase tracking-wider"
+            class="mt-2 text-xs font-bold transition-colors duration-300 text-center font-serif"
             :class="stage.status === 'pending' ? 'text-stone-300' : 'text-stone-800'"
           >
             {{ stage.label }}
           </div>
-
-          <!-- Sub-nodes Connector (Vertical Line) -->
-          <div v-if="activeMainStage === stage.id" class="absolute top-5 h-6 w-px bg-stone-200 animate-grow-down"></div>
+          
+          <!-- Active Indicator (Triangle) -->
+          <div v-if="activeMainStage === stage.id" class="absolute top-8 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[6px] border-b-stone-100 mt-3 animate-fade-in"></div>
         </div>
       </div>
     </div>
 
-    <!-- Expanded Sub-nodes Area -->
+    <!-- Expanded Sub-nodes Area (Paper Note Style) -->
     <div
       v-if="activeMainStage"
-      class="bg-stone-50 rounded-xl p-4 mt-2 animate-fade-in border border-stone-100 relative"
+      class="bg-[#fdfbf7] rounded-sm p-5 mt-1 animate-expand-height shadow-[2px_2px_8px_rgba(0,0,0,0.05)] border border-stone-200/60 relative overflow-hidden"
     >
-      <!-- Little Triangle -->
-      <div
-        class="absolute -top-1.5 w-3 h-3 bg-stone-50 border-t border-l border-stone-100 rotate-45 transition-all duration-300"
-        :style="{ left: getTriangleLeft(activeMainStage) }"
-      ></div>
+      <!-- Paper Texture -->
+      <div class="absolute inset-0 bg-paper-texture opacity-30 pointer-events-none"></div>
+      
+      <!-- Tape Effect -->
+      <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-16 h-6 bg-white/40 backdrop-blur-[1px] border-l border-r border-white/60 rotate-1 opacity-60 shadow-sm"></div>
 
-      <div class="flex items-start gap-2 overflow-x-auto py-2 px-1 custom-scrollbar">
+      <!-- Scrollable Nodes -->
+      <div class="flex items-start gap-6 overflow-x-auto pb-2 custom-scrollbar relative z-10">
         <div
           v-for="(node, idx) in activeSubNodes"
           :key="idx"
-          class="shrink-0 flex flex-col items-center gap-2 cursor-pointer group min-w-[60px]"
-          @click="$emit('node-click', node)"
+          class="shrink-0 flex flex-col items-start gap-2 min-w-[120px] group"
         >
-          <div
-            class="w-3 h-3 rounded-full border transition-all duration-300"
-            :class="[
-              node.current
-                ? 'bg-stone-800 border-stone-800 scale-110'
-                : node.completed
-                  ? 'bg-stone-400 border-stone-400'
-                  : 'bg-white border-stone-300'
-            ]"
-          ></div>
-          <span
-            class="text-[10px] font-medium text-center px-2 py-1 rounded-md transition-colors truncate max-w-[80px]"
-            :class="node.current ? 'bg-stone-200 text-stone-800' : 'text-stone-500 group-hover:text-stone-700'"
+          <!-- Node Title & Status -->
+          <div 
+            class="flex items-center gap-2 cursor-pointer"
+            @click="$emit('node-click', node)"
           >
-            {{ node.stage }}
-          </span>
+            <div
+              class="w-3 h-3 rounded-full border transition-all duration-300"
+              :class="[
+                node.current
+                  ? 'bg-stone-800 border-stone-800'
+                  : node.completed
+                    ? 'bg-stone-400 border-stone-400'
+                    : 'bg-white border-stone-300'
+              ]"
+            ></div>
+            <span
+              class="text-xs font-bold transition-colors"
+              :class="node.current ? 'text-stone-800' : 'text-stone-500'"
+            >
+              {{ node.stage }}
+            </span>
+          </div>
+
+          <!-- Sub-tasks List (Expandable) -->
+          <div v-if="node.subEvents && node.subEvents.length > 0" class="pl-1.5 border-l border-stone-200 ml-1.5 space-y-2 mt-1">
+             <div 
+               v-for="event in node.subEvents" 
+               :key="event.id"
+               class="flex items-start gap-2 pl-3 text-[10px] text-stone-600 hover:text-stone-800 cursor-pointer transition-colors"
+             >
+               <div class="w-2 h-2 mt-0.5 border border-stone-300 rounded-sm" :class="{ 'bg-stone-800 border-stone-800': event.completed }"></div>
+               <span :class="{ 'line-through text-stone-400': event.completed }">{{ event.title }}</span>
+             </div>
+          </div>
+          <div v-else-if="node.current" class="pl-4 text-[10px] text-stone-400 italic mt-1">
+             暂无子任务...
+             <button class="text-amber-600 hover:underline ml-1">添加</button>
+          </div>
         </div>
 
-        <div v-if="activeSubNodes.length === 0" class="text-xs text-stone-400 w-full text-center py-2">
-          暂无进度记录
+        <div v-if="activeSubNodes.length === 0" class="text-xs text-stone-400 w-full text-center py-2 italic">
+          暂无详细记录
         </div>
       </div>
     </div>
@@ -116,17 +146,12 @@ watch(
 )
 
 const mainStages = computed(() => {
-  const stages: { id: MainStage; label: string; status: 'completed' | 'active' | 'pending' }[] = [
-    { id: 'Applied', label: '已投递', status: 'pending' },
-    { id: 'Interview', label: '面试', status: 'pending' },
-    { id: 'Offer', label: 'Offer', status: 'pending' }
+  const stages: { id: MainStage; label: string; status: 'completed' | 'active' | 'pending'; cheer: { text: string, emoji: string } }[] = [
+    { id: 'Applied', label: '已投递', status: 'pending', cheer: { text: '种下一颗种子，静待发芽。', emoji: '🌱' } },
+    { id: 'Interview', label: '面试', status: 'pending', cheer: { text: '保持自信，你离 Offer 只差一步！', emoji: '✨' } },
+    { id: 'Offer', label: 'Offer', status: 'pending', cheer: { text: '所有的努力，终将会有回报。', emoji: '🎁' } }
   ]
 
-  // Logic to determine status of each main stage
-  // This is simplified; real logic would check if ALL nodes in previous stage are done, etc.
-  // Here we rely on currentMainStage or deduce from timeline.
-
-  // Find index of current main stage
   const currentIndex = stages.findIndex((s) => s.id === props.currentMainStage)
 
   return stages.map((s, idx) => {
@@ -136,13 +161,17 @@ const mainStages = computed(() => {
   })
 })
 
+const currentCheer = computed(() => {
+  const stage = mainStages.value.find(s => s.id === activeMainStage.value)
+  return stage?.cheer || { text: '加油！', emoji: '💪' }
+})
+
 const activeSubNodes = computed(() => {
   if (!activeMainStage.value) return []
   return props.timeline.filter((n) => n.mainStage === activeMainStage.value)
 })
 
 const overallProgress = computed(() => {
-  // Visual progress for the top bar (0, 50, 100 roughly)
   if (props.currentMainStage === 'Applied') return 20
   if (props.currentMainStage === 'Interview') return 60
   if (props.currentMainStage === 'Offer') return 100
@@ -150,56 +179,48 @@ const overallProgress = computed(() => {
 })
 
 const toggleStage = (id: MainStage) => {
-  if (activeMainStage.value === id) {
-    // Optional: collapse if clicking same?
-    // activeMainStage.value = null
-  } else {
+  if (activeMainStage.value !== id) {
     activeMainStage.value = id
   }
 }
 
 const getStageColor = (status: string) => {
-  if (status === 'completed') return 'border-stone-800'
-  if (status === 'active') return 'border-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.4)]'
+  if (status === 'completed') return 'border-stone-800 text-stone-800'
+  if (status === 'active') return 'border-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.2)]'
   return 'border-stone-200'
-}
-
-const getTriangleLeft = (id: string) => {
-  if (id === 'Applied') return '16.5%'
-  if (id === 'Interview') return '50%'
-  if (id === 'Offer') return '83.5%'
-  return '50%'
 }
 </script>
 
 <style scoped>
-.animate-grow-down {
-  animation: grow-down 0.3s ease-out forwards;
+.animate-expand-height {
+  animation: expand-height 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   transform-origin: top;
 }
 
-@keyframes grow-down {
+@keyframes expand-height {
   from {
-    transform: scaleY(0);
+    opacity: 0;
+    transform: scaleY(0.95);
+    max-height: 0;
   }
   to {
+    opacity: 1;
     transform: scaleY(1);
+    max-height: 300px; /* Enough for content */
   }
 }
 
 .animate-fade-in {
-  animation: fade-in 0.3s ease-out forwards;
+  animation: fade-in 0.4s ease-out forwards;
 }
 
 @keyframes fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(-5px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.bg-paper-texture {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.1'/%3E%3C/svg%3E");
 }
 
 .custom-scrollbar::-webkit-scrollbar {
@@ -211,5 +232,8 @@ const getTriangleLeft = (id: string) => {
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background-color: #e7e5e4;
   border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #d6d3d1;
 }
 </style>

@@ -12,12 +12,23 @@ export const useJobMatch = () => {
   const isJobMatchMode = ref(false)
   const jdContent = ref('')
   const isAnalyzing = ref(false)
-  
+
   // Mock keywords for demonstration - in a real app this would use NLP/AI
   const commonTechKeywords = [
-    'Vue', 'React', 'TypeScript', 'JavaScript', 'Node.js', 'HTML', 'CSS',
-    'Tailwind', 'Git', 'Webpack', 'Vite', 'Agile', 'Scrum', 'REST API',
-    'GraphQL', 'AWS', 'Docker', 'CI/CD', 'Teamwork', 'Communication'
+    // Frontend
+    'Vue', 'React', 'TypeScript', 'JavaScript', 'Node.js', 'HTML', 'CSS', 'Tailwind', 'Sass', 'Less',
+    'Git', 'Webpack', 'Vite', 'Jest', 'Cypress', 'Eslint', 'Prettier',
+    
+    // Backend / DevOps
+    'REST API', 'GraphQL', 'AWS', 'Docker', 'Kubernetes', 'CI/CD', 'Nginx', 'Linux',
+    'Python', 'Java', 'Go', 'SQL', 'MongoDB', 'Redis',
+    
+    // Design / Product
+    'Figma', 'Sketch', 'UI/UX', 'Photoshop', 'Axure', 'Product Management',
+    
+    // Soft Skills / Methodologies
+    'Agile', 'Scrum', 'Kanban', 'Teamwork', 'Communication', 'Leadership', 
+    'Problem Solving', 'English', 'Analysis', 'Project Management'
   ]
 
   const analysisResult = ref<JobMatchResult | null>(null)
@@ -30,24 +41,24 @@ export const useJobMatch = () => {
     if (!jdContent.value.trim()) return
 
     isAnalyzing.value = true
-    
+
     // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1500))
+    await new Promise((resolve) => setTimeout(resolve, 1500))
 
     // Simple keyword matching logic
     const jdText = jdContent.value.toLowerCase()
     const resumeText = JSON.stringify(resumeData).toLowerCase()
-    
+
     const foundKeywords: string[] = []
     const missingKeywords: string[] = []
 
     // Extract potential keywords from JD (mock implementation)
-    // In reality, we'd extract these FROM the JD text. 
+    // In reality, we'd extract these FROM the JD text.
     // Here we just check which of our "common list" appears in the JD.
-    const jdKeywords = commonTechKeywords.filter(k => jdText.includes(k.toLowerCase()))
+    const jdKeywords = commonTechKeywords.filter((k) => jdText.includes(k.toLowerCase()))
 
     // Check overlap with resume
-    jdKeywords.forEach(keyword => {
+    jdKeywords.forEach((keyword) => {
       if (resumeText.includes(keyword.toLowerCase())) {
         foundKeywords.push(keyword)
       } else {
@@ -63,9 +74,10 @@ export const useJobMatch = () => {
       score: Math.max(score, 45), // Minimum "encouragement" score
       matchedKeywords: foundKeywords,
       missingKeywords,
-      suggestions: missingKeywords.length > 0 
-        ? [`建议在"专业技能"或"项目经历"中补充：${missingKeywords.slice(0, 3).join(', ')}`] 
-        : ['简历匹配度很高，建议检查排版后导出！']
+      suggestions:
+        missingKeywords.length > 0
+          ? [`建议在"专业技能"或"项目经历"中补充：${missingKeywords.slice(0, 3).join(', ')}`]
+          : ['简历匹配度很高，建议检查排版后导出！']
     }
 
     isAnalyzing.value = false
@@ -80,4 +92,3 @@ export const useJobMatch = () => {
     analyzeJD
   }
 }
-

@@ -5,6 +5,7 @@ export interface ResumeSection {
   type: 'basics' | 'summary' | 'education' | 'work' | 'projects' | 'skills' | 'custom'
   title: string
   isVisible: boolean
+  variant?: string // e.g. 'list', 'matrix', 'cloud', 'timeline'
 }
 
 export interface ResumeData {
@@ -64,10 +65,10 @@ const defaultResume: ResumeData = {
   },
   sections: [
     { id: 'summary', type: 'summary', title: '个人简介', isVisible: true },
-    { id: 'education', type: 'education', title: '教育经历', isVisible: true },
-    { id: 'work', type: 'work', title: '工作经历', isVisible: true },
+    { id: 'education', type: 'education', title: '教育经历', isVisible: true, variant: 'timeline' },
+    { id: 'work', type: 'work', title: '工作经历', isVisible: true, variant: 'timeline' },
     { id: 'projects', type: 'projects', title: '项目经验', isVisible: true },
-    { id: 'skills', type: 'skills', title: '专业技能', isVisible: true }
+    { id: 'skills', type: 'skills', title: '专业技能', isVisible: true, variant: 'list' }
   ],
   custom: {},
   education: [
@@ -180,15 +181,16 @@ export const useResume = () => {
     resumeData.value.basics[key] = value
   }
 
-  const addSection = (type: ResumeSection['type'], title: string) => {
+  const addSection = (type: ResumeSection['type'], title: string, variant?: string) => {
     const id = type + '-' + Date.now()
     resumeData.value.sections.push({
       id,
       type,
       title,
-      isVisible: true
+      isVisible: true,
+      variant
     })
-    
+
     if (type === 'custom') {
       if (!resumeData.value.custom) resumeData.value.custom = {}
       resumeData.value.custom[id] = ''
@@ -203,7 +205,7 @@ export const useResume = () => {
   }
 
   // Helper to add items to arrays (education, work, etc)
-  const addItem = (key: 'education' | 'work' | 'projects' | 'skills') => {
+  const addItem = (key: 'education' | 'work' | 'projects' | 'skills'): string => {
     const id = Date.now().toString()
     if (key === 'education') {
       resumeData.value.education.push({
@@ -230,6 +232,7 @@ export const useResume = () => {
     } else if (key === 'skills') {
       resumeData.value.skills.push({ id, name: '', level: '', keywords: [] })
     }
+    return id
   }
 
   const removeItem = (key: 'education' | 'work' | 'projects' | 'skills', id: string) => {

@@ -11,6 +11,12 @@ export interface SubEvent {
   completed?: boolean
 }
 
+export interface GrowthStat {
+  category: string
+  score: number
+  delta: number
+}
+
 export interface TimelineNode {
   id?: string // Added ID for easier tracking
   stage: string // Display Label (e.g. "Tech 1")
@@ -20,6 +26,8 @@ export interface TimelineNode {
   current: boolean
   detail?: string
   subEvents?: SubEvent[]
+  cheer?: string // Empathetic text for this stage
+  actionStatus?: string // e.g. "建议明天跟进"
 
   // Expanded Details
   interviewer?: string
@@ -33,6 +41,7 @@ export interface TimelineNode {
     weakPoints: string[]
     suggestions: string
   }
+  growthStats?: GrowthStat[] // New field
 }
 
 export interface ContactPerson {
@@ -48,6 +57,16 @@ export interface Attachment {
   size: string
   type: string
   uploadDate: string
+}
+
+export interface CheatSheetData {
+  interviewer: {
+    name: string
+    role: string
+  }
+  keywords: string[]
+  stories: string[]
+  questions: string[]
 }
 
 export interface JobApplication {
@@ -76,6 +95,8 @@ export interface JobApplication {
   applyDate?: string
   waitingDays?: number
 
+  cheatSheet?: CheatSheetData // New field for Interview Cheat Sheet
+
   aiInsight?: {
     replyRate?: string
     avgResponseTime?: string
@@ -87,6 +108,7 @@ export interface JobApplication {
 export interface StageConfig {
   id: string
   label: string
+  cheer: string // Default cheer text for main stage
   count: number
   color: 'gray' | 'blue' | 'green' | 'red'
 }

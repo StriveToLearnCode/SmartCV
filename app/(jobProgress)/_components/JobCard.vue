@@ -55,6 +55,15 @@
               {{ formatCountdown(job.nextInterviewDate) }}
             </span>
           </div>
+
+          <!-- Interview Cheat Sheet Button -->
+          <button
+            @click.stop="openCheatSheet"
+            class="ml-auto flex items-center gap-1.5 px-3 py-1.5 bg-[#fffdf5] border border-stone-200/80 rounded-full shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-amber-200 transition-all group/cheat"
+          >
+            <span class="text-sm filter drop-shadow-sm">💊</span>
+            <span class="text-xs font-bold text-stone-600 group-hover/cheat:text-stone-800 font-serif">面试急救包</span>
+          </button>
         </div>
 
         <!-- Progress Bar -->
@@ -117,13 +126,15 @@
     >
       <!-- Auto-save Feedback -->
       <div
-        v-if="saveStatus"
-        class="absolute top-4 right-4 z-20 flex items-center gap-1.5 bg-white/80 backdrop-blur px-2 py-1 rounded-md shadow-sm border border-stone-100 transition-opacity duration-500"
-        :class="saveStatus.visible ? 'opacity-100' : 'opacity-0'"
+        v-if="expanded"
+        class="absolute top-4 right-4 z-20 flex items-center gap-1.5 transition-opacity duration-500"
       >
-        <span v-if="saveStatus.type === 'success'" class="text-emerald-500">✔</span>
-        <span v-else class="text-amber-500">⚠</span>
-        <span class="text-[10px] font-medium text-stone-600">{{ saveStatus.msg }}</span>
+        <SaveStatusSticker
+          :status="saveStatus"
+          :timeAgo="timeAgo"
+          :lastSavedTime="lastSavedTime"
+          @retry="triggerSave(mockSave)"
+        />
       </div>
 
       <!-- If a specific node is selected, show Node Details -->
@@ -304,6 +315,7 @@
   <!-- Modals -->
   <ScheduleModal v-model="showScheduleModal" @save="handleScheduleSave" />
   <ReviewModal v-model="showReviewModal" :job="job" @save="handleReviewSave" />
+  <InterviewCheatSheet v-model="showCheatSheet" :data="job.cheatSheet" />
 </template>
 
 <script setup lang="ts">
@@ -314,6 +326,9 @@ import JobProgressBar from './JobProgressBar.vue'
 import PriorityBadge from './PriorityBadge.vue'
 import ScheduleModal from './ScheduleModal.vue'
 import ReviewModal from './ReviewModal.vue'
+import InterviewCheatSheet from './InterviewCheatSheet.vue'
+import SaveStatusSticker from '../../components/SaveStatusSticker.vue'
+import { useAutoSave } from '../../composables/useAutoSave'
 
 const props = defineProps<{
   job: JobApplication
@@ -321,16 +336,35 @@ const props = defineProps<{
 
 const emit = defineEmits(['update:status', 'update:job'])
 
-// State
+// Auto Save Logic
+const { status: saveStatus, triggerSave, timeAgo, lastSavedTime } = useAutoSave()
+
+const mockSave = async () => {
+  // Simulate API call
+  return new Promise<void>((resolve) => {
+    setTimeout(() => {
+      resolve()
+    }, 800)
+  })
+}
+
+const handleAutoSave = () => {
+  if (!isDirty.value) return
+  triggerSave(async () => {
+    await mockSave()
+    isDirty.value = false
+  })
+}
 const expanded = ref(false)
 const selectedNode = ref<TimelineNode | null>(null)
 const isDirty = ref(false)
 const showUnsavedDialog = ref(false)
 const showScheduleModal = ref(false)
 const showReviewModal = ref(false)
+const showCheatSheet = ref(false)
 
-// Auto-save Feedback State
-const saveStatus = ref<{ visible: boolean; type: 'success' | 'error'; msg: string } | null>(null)
+// Auto-save Feedback State - Removed in favor of useAutoSave
+// const saveStatus = ...
 
 // Dynamic Actions based on Stage
 const stageActions = computed(() => {
@@ -393,28 +427,19 @@ const markDirty = () => {
   isDirty.value = true
 }
 
+// Replaced by handleAutoSave
 const autoSave = () => {
-  if (!isDirty.value) return
-
-  // Mock Async Save
-  setTimeout(() => {
-    isDirty.value = false
-    showSaveFeedback('success', '已自动保存 · 刚刚')
-  }, 800)
+  handleAutoSave()
 }
 
 const manualSave = () => {
-  // Mock Save
-  isDirty.value = false
-  showSaveFeedback('success', '保存成功')
+  triggerSave(async () => {
+    await mockSave()
+    isDirty.value = false
+  })
 }
 
-const showSaveFeedback = (type: 'success' | 'error', msg: string) => {
-  saveStatus.value = { visible: true, type, msg }
-  setTimeout(() => {
-    if (saveStatus.value) saveStatus.value.visible = false
-  }, 3000)
-}
+// Removed showSaveFeedback as it is handled by useAutoSave component
 
 const saveAndClose = () => {
   manualSave()
@@ -440,14 +465,23 @@ const openScheduleModal = () => {
   showScheduleModal.value = true
 }
 
+const openCheatSheet = () => {
+  showCheatSheet.value = true
+}
+
 const handleScheduleSave = () => {
   // Mock: Update local job data
-  showSaveFeedback('success', '已安排 · 已加入你的日历')
-  // Real world: Emit event to parent to update data store
+  triggerSave(async () => {
+    // Already saved in modal, just show feedback on card
+    await Promise.resolve()
+  })
 }
 
 const handleReviewSave = () => {
-  showSaveFeedback('success', '复盘已提交 · 建议生成中')
+  triggerSave(async () => {
+    // Already saved in modal
+    await Promise.resolve()
+  })
 }
 
 const formatCountdown = (dateStr?: string) => {

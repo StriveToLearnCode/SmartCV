@@ -28,8 +28,30 @@
     <main class="container mx-auto px-4 pt-12 pb-24 min-h-screen flex flex-col">
       <!-- Overview View: Default Dashboard -->
       <template v-if="currentTab === 'overview'">
-        <!-- 1. 顶部欢迎语 -->
-        <WelcomeHeader />
+        <!-- 1. 顶部欢迎语 (Relative container for absolute positioning of the guide) -->
+        <div class="relative mb-6">
+          <WelcomeHeader />
+          
+          <!-- Next Step Guide Area (Absolute right) -->
+          <div class="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 transform hover:scale-105 transition-transform z-10">
+             <StickyNoteGuide 
+               v-if="guide"
+               :title="guide.message"
+               :description="guide.subMessage"
+               :type="guide.status === 'all_good' ? 'success' : 'warning'"
+             />
+          </div>
+        </div>
+
+        <!-- Mobile/Tablet Guide (Visible on small/medium screens) -->
+         <div class="lg:hidden mb-6 flex justify-center">
+             <StickyNoteGuide 
+               v-if="guide"
+               :title="guide.message"
+               :description="guide.subMessage"
+               :type="guide.status === 'all_good' ? 'success' : 'warning'"
+             />
+         </div>
 
         <!-- 2. 中间 AI 对话框 -->
         <div class="grow flex flex-col justify-center my-8">
@@ -83,14 +105,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import WelcomeHeader from './_components/WelcomeHeader.vue'
 import AIChat from './_components/AIChat.vue'
 import SmartBoard from './_components/SmartBoard.vue'
 import FloatingCapsule from './_components/FloatingCapsule.vue'
 import JobProgressView from '../(jobProgress)/layout.vue'
 import AiSuggestionView from '../(aiSuggestion)/layout.vue'
+import StickyNoteGuide from '../components/StickyNoteGuide.vue'
+import { useUserGuide } from '../composables/useUserGuide'
+
 const currentTab = ref('overview')
+const { currentGuide: guide } = useUserGuide()
 
 const tabNameMap: Record<string, string> = {
   overview: '简历概览',
