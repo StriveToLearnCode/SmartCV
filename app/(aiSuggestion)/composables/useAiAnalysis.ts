@@ -250,4 +250,3 @@ export function useAiAnalysis() {
     categoryMap: CATEGORY_MAP
   }
 }
-

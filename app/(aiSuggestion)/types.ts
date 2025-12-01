@@ -24,4 +24,3 @@ export const CATEGORY_MAP: Record<string, string> = {
   education: '教育背景',
   skills: '技能特长'
 }
-

@@ -16,19 +16,59 @@ export const useJobMatch = () => {
   // Mock keywords for demonstration - in a real app this would use NLP/AI
   const commonTechKeywords = [
     // Frontend
-    'Vue', 'React', 'TypeScript', 'JavaScript', 'Node.js', 'HTML', 'CSS', 'Tailwind', 'Sass', 'Less',
-    'Git', 'Webpack', 'Vite', 'Jest', 'Cypress', 'Eslint', 'Prettier',
-    
+    'Vue',
+    'React',
+    'TypeScript',
+    'JavaScript',
+    'Node.js',
+    'HTML',
+    'CSS',
+    'Tailwind',
+    'Sass',
+    'Less',
+    'Git',
+    'Webpack',
+    'Vite',
+    'Jest',
+    'Cypress',
+    'Eslint',
+    'Prettier',
+
     // Backend / DevOps
-    'REST API', 'GraphQL', 'AWS', 'Docker', 'Kubernetes', 'CI/CD', 'Nginx', 'Linux',
-    'Python', 'Java', 'Go', 'SQL', 'MongoDB', 'Redis',
-    
+    'REST API',
+    'GraphQL',
+    'AWS',
+    'Docker',
+    'Kubernetes',
+    'CI/CD',
+    'Nginx',
+    'Linux',
+    'Python',
+    'Java',
+    'Go',
+    'SQL',
+    'MongoDB',
+    'Redis',
+
     // Design / Product
-    'Figma', 'Sketch', 'UI/UX', 'Photoshop', 'Axure', 'Product Management',
-    
+    'Figma',
+    'Sketch',
+    'UI/UX',
+    'Photoshop',
+    'Axure',
+    'Product Management',
+
     // Soft Skills / Methodologies
-    'Agile', 'Scrum', 'Kanban', 'Teamwork', 'Communication', 'Leadership', 
-    'Problem Solving', 'English', 'Analysis', 'Project Management'
+    'Agile',
+    'Scrum',
+    'Kanban',
+    'Teamwork',
+    'Communication',
+    'Leadership',
+    'Problem Solving',
+    'English',
+    'Analysis',
+    'Project Management'
   ]
 
   const analysisResult = ref<JobMatchResult | null>(null)

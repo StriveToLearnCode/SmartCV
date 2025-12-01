@@ -15,7 +15,7 @@ export function useUserGuide() {
   const incompleteModules = ref(2)
   const unreviewedInterviews = ref(1)
   const jobMatchScore = ref(78)
-  
+
   const currentGuide = computed<GuideState>(() => {
     // 1. Priority: Unfinished Resume
     if (incompleteModules.value > 0) {
@@ -58,4 +58,3 @@ export function useUserGuide() {
     currentGuide
   }
 }
-

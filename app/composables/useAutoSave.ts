@@ -7,7 +7,7 @@ export function useAutoSave() {
   const lastSavedTime = ref<Date | null>(null)
   const errorMessage = ref<string | null>(null)
   const timeAgo = ref('')
-  
+
   let timer: number | null = null
 
   const updateTimeAgo = () => {
@@ -45,16 +45,15 @@ export function useAutoSave() {
 
     try {
       // 模拟网络延迟，确保用户能看到“保存中”
-      const minDelay = new Promise(resolve => setTimeout(resolve, 500))
-      
+      const minDelay = new Promise((resolve) => setTimeout(resolve, 500))
+
       await Promise.all([saveFn(), minDelay])
-      
+
       status.value = 'saved'
       lastSavedTime.value = new Date()
       timeAgo.value = '刚刚'
-      
+
       startTimer()
-      
     } catch (err) {
       console.error('Auto save failed:', err)
       status.value = 'error'
