@@ -42,7 +42,7 @@ export interface TimelineNode {
     suggestions: string
   }
   growthStats?: GrowthStat[] // New field
-  
+
   // Audio Review
   audioRecording?: {
     file?: File | null // Runtime only

@@ -83,13 +83,12 @@ const initialJobs: JobApplication[] = [
 const allJobs = ref<JobApplication[]>(initialJobs)
 
 export const useJobStore = () => {
-  
   const addJob = (job: JobApplication) => {
     allJobs.value.push(job)
   }
 
   const updateJobStatus = (jobId: string, newStatus: string) => {
-    const job = allJobs.value.find(j => j.id === jobId)
+    const job = allJobs.value.find((j) => j.id === jobId)
     if (job) {
       // Update logic here (simplified)
       console.log(`Job ${jobId} status updated to ${newStatus}`)
@@ -97,7 +96,7 @@ export const useJobStore = () => {
   }
 
   const getJobById = (id: string) => {
-    return allJobs.value.find(j => j.id === id)
+    return allJobs.value.find((j) => j.id === id)
   }
 
   return {
@@ -107,4 +106,3 @@ export const useJobStore = () => {
     getJobById
   }
 }
-
