@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 
-const props = defineProps<{
+defineProps<{
   initialValue?: string
 }>()
 
@@ -31,7 +31,7 @@ const generateDescription = async () => {
   let generated = ''
 
   if (s && t && a && r) {
-    generated = `在${s}项目中，针对${t}的问题，我主导/参与了${a}，最终实现了${r}。`
+    generated = `在${s}项目中，面对${t}的挑战，我通过${a}，最终取得了${r}的成果。`
   } else {
     // Fallback for partial inputs
     const parts = []
@@ -46,31 +46,30 @@ const generateDescription = async () => {
   isGenerating.value = false
   emit('close')
 }
-
-const autoFill = () => {
-  // Simulate parsing existing text to STAR (Mock)
-  // In real app, this would use AI to reverse-engineer the text
-}
 </script>
 
 <template>
   <div
-    class="bg-[#fffdf5] border border-amber-200/50 rounded-lg p-4 shadow-sm relative overflow-hidden my-3 transform transition-all"
+    class="bg-[#fefce8] border border-amber-200/60 rounded-sm p-6 shadow-lg relative overflow-hidden my-4 transform rotate-1 transition-all max-w-lg mx-auto"
   >
     <!-- "Tape" visual -->
     <div
-      class="absolute -top-3 left-1/2 -translate-x-1/2 w-16 h-6 bg-amber-100/80 opacity-60 rotate-1 shadow-sm pointer-events-none z-10"
+      class="absolute -top-3 left-1/2 -translate-x-1/2 w-24 h-8 bg-amber-100/80 border border-white/40 -rotate-1 shadow-sm pointer-events-none z-10 backdrop-blur-sm"
     ></div>
 
-    <div class="flex justify-between items-center mb-4">
-      <h3 class="text-xs font-bold text-amber-800 uppercase tracking-widest flex items-center gap-2">
-        <span class="text-lg">✨</span> STAR 写作助手
-      </h3>
-      <button @click="$emit('close')" class="text-amber-400 hover:text-amber-700">
+    <!-- Header -->
+    <div class="flex justify-between items-start mb-6 mt-2">
+      <div>
+        <h3 class="text-lg font-bold text-stone-800 flex items-center gap-2 font-handwriting tracking-wide">
+          <span class="text-xl">✨</span> 让我来陪你理清思路
+        </h3>
+        <p class="text-xs text-stone-500 mt-1 font-serif ml-1">别担心文采，像聊天一样告诉我发生了什么，我帮你整理。</p>
+      </div>
+      <button @click="$emit('close')" class="text-stone-400 hover:text-stone-600 transition-colors p-1">
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          width="14"
-          height="14"
+          width="20"
+          height="20"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -84,51 +83,85 @@ const autoFill = () => {
       </button>
     </div>
 
-    <div class="space-y-3">
-      <div class="group">
-        <label class="block text-[10px] font-bold text-amber-600/70 mb-1 uppercase">S - 情境 (Situation)</label>
+    <!-- Step by Step Inputs -->
+    <div class="space-y-5 relative">
+      <!-- Vertical Guide Line -->
+      <div class="absolute left-[7px] top-2 bottom-2 w-0.5 bg-amber-200/50 rounded-full"></div>
+
+      <!-- Situation -->
+      <div class="group relative pl-6">
+        <div
+          class="absolute left-0 top-1.5 w-4 h-4 rounded-full bg-white border-2 border-amber-300 flex items-center justify-center text-[8px] font-bold text-amber-600 z-10"
+        >
+          1
+        </div>
+        <label class="block text-xs font-bold text-stone-600 mb-1.5">当时是什么情况？(Situation)</label>
         <input
           v-model="form.situation"
-          placeholder="例如：在高并发促销活动期间..."
-          class="w-full bg-white/50 border-b border-amber-200 focus:border-amber-500 outline-none text-sm py-1 text-stone-700 placeholder:text-amber-300/70 transition-colors"
+          placeholder="例如：双十一大促期间，流量突然暴涨了3倍..."
+          class="w-full bg-white/60 border-b-2 border-amber-100 focus:border-amber-400 outline-none text-sm py-2 px-2 text-stone-700 placeholder:text-stone-400/60 transition-colors font-serif rounded-t-sm hover:bg-white/80"
         />
       </div>
 
-      <div class="group">
-        <label class="block text-[10px] font-bold text-amber-600/70 mb-1 uppercase">T - 任务 (Task)</label>
+      <!-- Task -->
+      <div class="group relative pl-6">
+        <div
+          class="absolute left-0 top-1.5 w-4 h-4 rounded-full bg-white border-2 border-amber-300 flex items-center justify-center text-[8px] font-bold text-amber-600 z-10"
+        >
+          2
+        </div>
+        <label class="block text-xs font-bold text-stone-600 mb-1.5">遇到了什么难题？(Task)</label>
         <input
           v-model="form.task"
-          placeholder="例如：需要优化页面加载速度..."
-          class="w-full bg-white/50 border-b border-amber-200 focus:border-amber-500 outline-none text-sm py-1 text-stone-700 placeholder:text-amber-300/70 transition-colors"
+          placeholder="例如：服务器响应变慢，用户开始投诉下单失败..."
+          class="w-full bg-white/60 border-b-2 border-amber-100 focus:border-amber-400 outline-none text-sm py-2 px-2 text-stone-700 placeholder:text-stone-400/60 transition-colors font-serif rounded-t-sm hover:bg-white/80"
         />
       </div>
 
-      <div class="group">
-        <label class="block text-[10px] font-bold text-amber-600/70 mb-1 uppercase">A - 行动 (Action)</label>
+      <!-- Action -->
+      <div class="group relative pl-6">
+        <div
+          class="absolute left-0 top-1.5 w-4 h-4 rounded-full bg-white border-2 border-amber-300 flex items-center justify-center text-[8px] font-bold text-amber-600 z-10"
+        >
+          3
+        </div>
+        <label class="block text-xs font-bold text-stone-600 mb-1.5">你做了什么关键动作？(Action)</label>
         <input
           v-model="form.action"
-          placeholder="例如：使用了Redis缓存策略..."
-          class="w-full bg-white/50 border-b border-amber-200 focus:border-amber-500 outline-none text-sm py-1 text-stone-700 placeholder:text-amber-300/70 transition-colors"
+          placeholder="例如：我快速定位了慢查询，引入了Redis缓存..."
+          class="w-full bg-white/60 border-b-2 border-amber-100 focus:border-amber-400 outline-none text-sm py-2 px-2 text-stone-700 placeholder:text-stone-400/60 transition-colors font-serif rounded-t-sm hover:bg-white/80"
         />
       </div>
 
-      <div class="group">
-        <label class="block text-[10px] font-bold text-amber-600/70 mb-1 uppercase">R - 结果 (Result)</label>
+      <!-- Result -->
+      <div class="group relative pl-6">
+        <div
+          class="absolute left-0 top-1.5 w-4 h-4 rounded-full bg-white border-2 border-amber-300 flex items-center justify-center text-[8px] font-bold text-amber-600 z-10"
+        >
+          4
+        </div>
+        <label class="block text-xs font-bold text-stone-600 mb-1.5">结果怎么样？(Result)</label>
         <input
           v-model="form.result"
-          placeholder="例如：加载时间减少了40%..."
-          class="w-full bg-white/50 border-b border-amber-200 focus:border-amber-500 outline-none text-sm py-1 text-stone-700 placeholder:text-amber-300/70 transition-colors"
+          placeholder="例如：响应时间降低了50%，零客诉..."
+          class="w-full bg-white/60 border-b-2 border-amber-100 focus:border-amber-400 outline-none text-sm py-2 px-2 text-stone-700 placeholder:text-stone-400/60 transition-colors font-serif rounded-t-sm hover:bg-white/80"
         />
       </div>
     </div>
 
-    <button
-      @click="generateDescription"
-      :disabled="isGenerating"
-      class="mt-4 w-full bg-amber-100 hover:bg-amber-200 text-amber-800 text-xs font-bold py-2 rounded border border-amber-200 shadow-sm hover:shadow transition-all flex items-center justify-center gap-2"
-    >
-      <span v-if="isGenerating" class="animate-spin">↻</span>
-      <span v-else>⚡️ 生成专业描述</span>
-    </button>
+    <!-- Footer Action -->
+    <div class="mt-8 flex items-center justify-between gap-4">
+      <div class="text-[10px] text-amber-700/60 italic font-serif max-w-[60%]">
+        "放心，我会把这些变成面试官喜欢听的专业表达。"
+      </div>
+      <button
+        @click="generateDescription"
+        :disabled="isGenerating"
+        class="px-5 py-2.5 bg-stone-800 text-[#fefce8] text-xs font-bold rounded-sm shadow-md hover:bg-stone-700 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-wait"
+      >
+        <span v-if="isGenerating" class="animate-spin">↻</span>
+        <span v-else class="group-hover:scale-105 transition-transform">✍️ 帮我润色</span>
+      </button>
+    </div>
   </div>
 </template>

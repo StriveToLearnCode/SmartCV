@@ -2,8 +2,8 @@
 
 /* 1. 纸纤维颗粒淡入 (Paper Texture) */
 .bg-paper-texture {
-  background-color: #ffffff;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
+  background-color: #f7f5f2;
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%239C92AC' fill-opacity='0.03' fill-rule='evenodd'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7z' /%3E%3C/g%3E%3C/svg%3E");
   background-repeat: repeat;
 }
 
@@ -34,13 +34,13 @@
   border-width: 2px;
 }
 
-/* 3. 墨水显影 (Ink Developing) - Base styles, animation handled by Motion */
+/* 3. 墨水显影 (Ink Developing) */
 .ink-text-word {
   display: inline-block;
   will-change: opacity, filter, transform;
 }
 
-/* 4. 导航手写下划线 (Handwriting Underline) */
+/* 4. 导航手写下划线 */
 .nav-link-underline {
   position: relative;
 }
@@ -56,8 +56,6 @@
   transform: scaleX(0);
   transform-origin: right;
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  /* Wiggle path SVG background could be here, but simple line is cleaner for now, 
-     or use clip-path for rough edges */
   clip-path: polygon(0 0, 100% 1px, 98% 100%, 2% 98%);
 }
 
@@ -66,12 +64,38 @@
   transform-origin: left;
 }
 
-/* 5. 呼吸感光晕 (Breathing Glow) - refined */
+/* 5. 呼吸感光晕 */
 @keyframes breathe-glow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(120, 113, 108, 0); }
-  50% { box-shadow: 0 0 20px 2px rgba(120, 113, 108, 0.1); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(253, 224, 71, 0); } /* yellow-300 */
+  50% { box-shadow: 0 0 15px 2px rgba(253, 224, 71, 0.3); }
 }
 
 .animate-breathe-glow {
-  animation: breathe-glow 5s ease-in-out infinite;
+  animation: breathe-glow 4s ease-in-out infinite;
+}
+
+/* 6. 新增：特定颜色变量类 (根据需求) */
+.bg-warm-yellow {
+  background-color: #fef08a; /* yellow-200 similar */
+}
+.text-warm-yellow {
+  color: #854d0e; /* yellow-800 for contrast */
+}
+
+.bg-soft-orange {
+  background-color: #ffedd5; /* orange-100 */
+}
+.text-soft-orange {
+  color: #9a3412; /* orange-800 */
+}
+
+/* 7. 纸团动画相关 */
+@keyframes crumple {
+  0% { transform: scale(1) rotate(0deg); opacity: 1; }
+  50% { transform: scale(0.5) rotate(180deg); opacity: 0.5; border-radius: 50%; }
+  100% { transform: scale(0.2) rotate(360deg); opacity: 0; }
+}
+
+.animate-crumple {
+  animation: crumple 0.8s ease-in-out forwards;
 }

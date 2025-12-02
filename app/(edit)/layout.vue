@@ -11,8 +11,8 @@ const { resumeData, undo, redo, canUndo, canRedo } = useResume()
 const { isJobMatchMode, jdContent, isAnalyzing, analysisResult, toggleJobMatchMode, analyzeJD } = useJobMatch()
 const { currentGuide: guide } = useUserGuide()
 
-const isSaving = ref(false)
-const saveStatus = computed(() => (isSaving.value ? '保存中...' : '已保存'))
+// const isSaving = ref(false) // Moved to individual components or global state if needed
+// const saveStatus = computed(() => (isSaving.value ? '保存中...' : '已保存'))
 
 const handleAnalyze = () => {
   analyzeJD(resumeData.value)
@@ -31,7 +31,7 @@ watch(jdContent, (newVal) => {
 </script>
 
 <template>
-  <div class="h-screen w-full bg-[#f5f5f0] text-stone-800 font-sans flex overflow-hidden">
+  <div class="h-screen w-full bg-[#f5f5f0] bg-paper-texture text-stone-800 font-sans flex overflow-hidden">
     <!-- Left Sidebar (Editor) - 45% -->
     <aside
       class="w-[45%] min-w-[420px] max-w-[600px] h-full border-r border-stone-200/60 bg-[#fdfdfc] shadow-[10px_0_30px_-10px_rgba(0,0,0,0.03)] relative z-20 flex flex-col transition-all duration-300 ease-in-out"
@@ -42,18 +42,21 @@ watch(jdContent, (newVal) => {
       >
         <div class="flex items-center gap-4">
           <div>
-            <h2 class="text-lg font-serif font-bold text-stone-800 flex items-center gap-2">
-              <span class="w-1.5 h-5 bg-stone-800 rounded-full"></span>
-              简历编辑器
+            <h2 class="text-xl font-serif font-bold text-stone-800 flex items-center gap-2 tracking-tight">
+              <!-- Notebook Icon -->
+              <span class="text-2xl transform -rotate-6">📒</span>
+              简历手账
             </h2>
-            <p class="text-[10px] text-stone-400 font-medium pl-3.5 mt-0.5 uppercase tracking-wider">
-              {{ saveStatus }}
-            </p>
           </div>
 
-          <!-- Undo/Redo -->
-          <div class="flex items-center gap-1 ml-2 border-l border-stone-200 pl-4 h-8">
-             <!-- ... undo/redo buttons ... -->
+          <!-- Undo/Redo (Simple Icons) -->
+          <div class="flex items-center gap-1 ml-2 pl-4 border-l border-stone-200 h-6">
+             <button @click="undo" :disabled="!canUndo" class="text-stone-400 hover:text-stone-700 disabled:opacity-30 transition-colors" title="撤销">
+               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"/></svg>
+             </button>
+             <button @click="redo" :disabled="!canRedo" class="text-stone-400 hover:text-stone-700 disabled:opacity-30 transition-colors" title="重做">
+               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5v0A5.5 5.5 0 0 0 9.5 20H13"/></svg>
+             </button>
           </div>
         </div>
 
@@ -73,93 +76,20 @@ watch(jdContent, (newVal) => {
           <!-- Job Matching Toggle -->
           <button
             @click="toggleJobMatchMode"
-            class="flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded-xl transition-all shadow-sm border"
+            class="flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded-xl transition-all shadow-sm border group"
             :class="
               isJobMatchMode
                 ? 'bg-amber-100 text-amber-800 border-amber-200 shadow-inner'
-                : 'bg-stone-100/50 text-stone-600 border-stone-200/50 hover:bg-white hover:shadow'
+                : 'bg-[#fffbeb] text-stone-600 border-stone-200 hover:bg-[#fff7ed] hover:border-amber-200 hover:text-amber-700'
             "
             title="开启职位匹配模式"
           >
-            <span class="text-base">🎯</span>
-            <span class="hidden xl:inline">职位匹配</span>
+            <span class="text-base group-hover:scale-110 transition-transform">🎯</span>
+            <span class="hidden xl:inline font-serif">匹配 JD</span>
           </button>
 
-          <!-- Functional Buttons -->
-          <div class="hidden lg:flex items-center gap-1 bg-stone-100/50 p-1 rounded-xl border border-stone-200/50 mr-2">
-            <button
-              class="flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-stone-600 hover:text-stone-900 hover:bg-white rounded-lg transition-all shadow-sm hover:shadow"
-              title="模板设置"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <rect width="18" height="18" x="3" y="3" rx="2" />
-                <path d="M3 9h18" />
-                <path d="M9 21V9" />
-              </svg>
-              <span class="hidden xl:inline">模板</span>
-            </button>
-            <button
-              class="flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-stone-600 hover:text-stone-900 hover:bg-white rounded-lg transition-all shadow-sm hover:shadow"
-              title="字体排版"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M4 7V4h16v3" />
-                <path d="M9 20h6" />
-                <path d="M12 4v16" />
-              </svg>
-              <span class="hidden xl:inline">排版</span>
-            </button>
-          </div>
-
           <button
-            class="p-2 text-stone-500 hover:text-stone-800 bg-stone-100 hover:bg-stone-200 rounded-xl transition-colors"
-            title="AI 优化"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path
-                d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72Z"
-              />
-              <path d="m14 7 3 3" />
-              <path d="M5 6v4" />
-              <path d="M19 14v4" />
-              <path d="M10 2v2" />
-              <path d="M7 8H3" />
-              <path d="M21 16h-4" />
-              <path d="M11 3H9" />
-            </svg>
-          </button>
-          <button
-            class="flex items-center gap-2 px-4 py-1.5 bg-stone-800 text-white text-xs font-bold rounded-xl shadow-md hover:bg-stone-900 transition-all hover:shadow-lg active:scale-95"
+            class="flex items-center gap-2 px-4 py-1.5 bg-stone-800 text-[#fefce8] text-xs font-bold rounded-sm shadow-[2px_2px_0px_0px_rgba(28,25,23,0.2)] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(28,25,23,0.2)] active:translate-y-[2px] active:shadow-none border-2 border-stone-800 transition-all"
             title="导出 PDF"
           >
             <svg
@@ -177,17 +107,13 @@ watch(jdContent, (newVal) => {
               <polyline points="7 10 12 15 17 10" />
               <line x1="12" x2="12" y1="15" y2="3" />
             </svg>
-            导出
+            <span class="hidden sm:inline">存进保险箱 (PDF)</span>
           </button>
         </div>
       </div>
 
       <!-- Editor Content -->
-      <div class="flex-1 overflow-hidden bg-[#f0f0ea] relative">
-        <!-- 顶部渐变阴影 -->
-        <div
-          class="absolute top-0 left-0 right-0 h-8 bg-linear-to-b from-stone-200/50 to-transparent z-10 pointer-events-none"
-        ></div>
+      <div class="flex-1 overflow-hidden bg-[#fdfdfc] relative">
         <EditorPanel :resume="resumeData" />
       </div>
     </aside>
@@ -205,7 +131,7 @@ watch(jdContent, (newVal) => {
         <!-- 预览容器，模拟A4纸张悬浮 -->
         <div class="h-full w-full overflow-y-auto custom-scrollbar flex justify-center p-8 md:p-12">
           <div
-            class="w-full max-w-[210mm] bg-white shadow-[0_20px_50px_-12px_rgba(0,0,0,0.15)] rounded-[2px] transition-all duration-500 ease-out relative z-10 flex flex-col origin-top scale-[0.85] md:scale-90 lg:scale-100 my-auto"
+            class="w-full max-w-[210mm] bg-white shadow-paper-float rounded-[1px] transition-all duration-500 ease-out relative z-10 flex flex-col origin-top scale-[0.85] md:scale-90 lg:scale-100 my-auto print-preview-card"
           >
             <ResumePreview :resume="resumeData" :highlight-keywords="analysisResult?.matchedKeywords || []" />
           </div>
@@ -213,28 +139,31 @@ watch(jdContent, (newVal) => {
 
         <!-- 底部提示 -->
         <div
-          class="absolute bottom-6 w-full text-center text-stone-400 text-xs font-serif italic flex gap-4 justify-center pointer-events-none z-20"
+          class="absolute bottom-6 w-full text-center text-stone-400 text-xs font-handwriting flex gap-4 justify-center pointer-events-none z-20 opacity-60"
         >
-          <span>实时预览中</span>
+          <span>"预览效果"</span>
           <span>·</span>
-          <span>A4 标准尺寸</span>
+          <span>A4</span>
         </div>
       </div>
 
       <!-- JD Sidebar (Slide Out) -->
       <aside
-        class="absolute top-0 right-0 bottom-0 w-[320px] md:w-[360px] bg-[#fffdf5] border-l border-amber-200/50 shadow-[-10px_0_30px_-10px_rgba(0,0,0,0.05)] z-40 transform transition-transform duration-500 ease-in-out flex flex-col"
+        class="absolute top-0 right-0 bottom-0 w-[320px] md:w-[360px] bg-[#fffdf5] border-l border-amber-200/50 shadow-[-10px_0_30px_-10px_rgba(0,0,0,0.05)] z-40 transform transition-transform duration-500 ease-in-out flex flex-col font-serif"
         :class="isJobMatchMode ? 'translate-x-0' : 'translate-x-full'"
       >
-        <div class="p-5 border-b border-amber-100 bg-[#fffdf5] flex justify-between items-center">
-          <h3 class="font-serif font-bold text-amber-900 flex items-center gap-2">
-            <span class="text-lg">🎯</span> 职位匹配助手
+        <!-- Tape at top -->
+        <div class="absolute -left-3 top-10 w-6 h-12 bg-amber-100/50 border border-amber-200/50 -rotate-3 shadow-sm z-50 pointer-events-none"></div>
+
+        <div class="p-5 border-b border-amber-100 bg-[#fffbeb] flex justify-between items-center relative">
+          <h3 class="font-bold text-amber-900 flex items-center gap-2">
+            <span class="text-xl">✂️</span> JD 剪报夹
           </h3>
-          <button @click="toggleJobMatchMode" class="text-amber-400 hover:text-amber-700">
+          <button @click="toggleJobMatchMode" class="text-amber-400 hover:text-amber-700 transition-colors">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
+              width="20"
+              height="20"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -248,62 +177,71 @@ watch(jdContent, (newVal) => {
           </button>
         </div>
 
-        <div class="flex-1 overflow-y-auto p-5 space-y-6 custom-scrollbar">
+        <div class="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar bg-paper-texture">
           <!-- Input Area -->
-          <div class="space-y-2">
-            <label class="text-xs font-bold text-amber-800/70 uppercase tracking-wider">粘贴职位描述 (JD)</label>
-            <textarea
-              v-model="jdContent"
-              class="w-full h-40 p-3 bg-white border border-amber-200 rounded-lg text-sm text-stone-700 placeholder:text-amber-300/50 focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100 resize-none shadow-inner"
-              placeholder="在此处粘贴 JD 内容，系统将自动分析..."
-            ></textarea>
+          <div class="space-y-3 relative">
+            <label class="text-xs font-bold text-amber-800/60 uppercase tracking-wider">粘贴职位描述</label>
+            <div class="relative">
+               <textarea
+                 v-model="jdContent"
+                 class="w-full h-48 p-4 bg-white border-2 border-dashed border-amber-200 rounded-sm text-sm text-stone-700 placeholder:text-amber-300/50 focus:outline-none focus:border-amber-400 resize-none leading-relaxed font-sans"
+                 placeholder="在这里粘贴 JD，我会帮你分析..."
+               ></textarea>
+               <!-- Paper clip visual -->
+               <div class="absolute -top-3 right-4 w-4 h-8 border-2 border-stone-300 rounded-full z-10 pointer-events-none rotate-12 bg-transparent" style="border-bottom: none; height: 10px;"></div>
+            </div>
             <button
               @click="handleAnalyze"
               :disabled="!jdContent || isAnalyzing"
-              class="w-full py-2.5 bg-amber-400 text-white font-bold rounded-lg shadow-md hover:bg-amber-500 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              class="w-full py-3 bg-stone-800 text-[#fefce8] font-bold rounded-sm shadow-md hover:bg-stone-700 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
             >
               <span v-if="isAnalyzing" class="animate-spin">↻</span>
-              {{ isAnalyzing ? '分析中...' : '开始匹配分析' }}
+              {{ isAnalyzing ? '正在分析...' : '✨ 生成分析卡片' }}
             </button>
           </div>
 
           <!-- Analysis Result -->
-          <div v-if="analysisResult" class="space-y-6 animate-fade-in">
-            <!-- Score -->
-            <div class="bg-white p-4 rounded-xl border border-amber-100 shadow-sm flex items-center gap-4">
-              <div class="relative w-16 h-16 flex items-center justify-center">
+          <div v-if="analysisResult" class="space-y-6 animate-fade-in pb-10">
+            <!-- Score Card -->
+            <div class="bg-white p-5 rounded-sm border border-amber-100 shadow-sm flex items-center gap-5 transform rotate-1 relative">
+              <div class="absolute -top-2 left-1/2 -translate-x-1/2 w-12 h-4 bg-amber-100/50 rotate-1"></div>
+              
+              <div class="relative w-16 h-16 flex items-center justify-center shrink-0">
                 <svg class="w-full h-full transform -rotate-90">
-                  <circle cx="32" cy="32" r="28" stroke="#fcd34d" stroke-width="6" fill="none" class="opacity-20" />
+                  <circle cx="32" cy="32" r="28" stroke="#fde68a" stroke-width="6" fill="none" class="opacity-30" />
                   <circle
                     cx="32"
                     cy="32"
                     r="28"
-                    stroke="#f59e0b"
+                    stroke="#d97706"
                     stroke-width="6"
                     fill="none"
                     :stroke-dasharray="2 * Math.PI * 28"
                     :stroke-dashoffset="2 * Math.PI * 28 * (1 - analysisResult.score / 100)"
+                    stroke-linecap="round"
                     class="transition-all duration-1000 ease-out"
                   />
                 </svg>
-                <span class="absolute text-lg font-bold text-amber-600">{{ analysisResult.score }}%</span>
+                <span class="absolute text-lg font-bold text-amber-700 font-mono">{{ analysisResult.score }}%</span>
               </div>
               <div>
-                <div class="text-xs text-stone-400 font-bold uppercase">匹配度评分</div>
-                <div class="text-sm text-stone-600 font-medium leading-tight mt-1">
-                  {{ analysisResult.score >= 80 ? '非常匹配！' : '还有优化空间' }}
+                <div class="text-[10px] text-stone-400 font-bold uppercase tracking-wider">匹配度</div>
+                <div class="text-sm text-stone-700 font-medium leading-snug mt-1">
+                  {{ analysisResult.score >= 80 ? '很有希望！冲！🚀' : '补全关键词后再投递 💪' }}
                 </div>
               </div>
             </div>
 
             <!-- Missing Keywords -->
             <div v-if="analysisResult.missingKeywords.length > 0">
-              <h4 class="text-xs font-bold text-amber-800/70 uppercase tracking-wider mb-2">缺失关键技能</h4>
+              <h4 class="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2 flex items-center gap-1">
+                <span>⚠️</span> 缺失关键词
+              </h4>
               <div class="flex flex-wrap gap-2">
                 <span
                   v-for="kw in analysisResult.missingKeywords"
                   :key="kw"
-                  class="px-2 py-1 bg-red-50 text-red-600 border border-red-100 rounded text-xs font-medium dashed-border"
+                  class="px-2 py-1 bg-red-50 text-red-600/80 border border-red-100 rounded-sm text-xs font-bold decoration-wavy underline decoration-red-200"
                 >
                   {{ kw }}
                 </span>
@@ -312,14 +250,15 @@ watch(jdContent, (newVal) => {
 
             <!-- Suggestions -->
             <div>
-              <h4 class="text-xs font-bold text-amber-800/70 uppercase tracking-wider mb-2">优化建议</h4>
-              <ul class="space-y-2">
+              <h4 class="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2">优化建议</h4>
+              <ul class="space-y-3">
                 <li
                   v-for="(sugg, i) in analysisResult.suggestions"
                   :key="i"
-                  class="text-sm text-stone-600 bg-amber-50/50 p-3 rounded-lg border border-amber-100/50 leading-relaxed"
+                  class="text-sm text-stone-600 bg-[#fefce8] p-3 rounded-sm border border-amber-100 leading-relaxed relative"
                 >
-                  💡 {{ sugg }}
+                  <span class="absolute -left-1 top-2 text-amber-400 text-xs">👉</span>
+                  <span class="pl-3">{{ sugg }}</span>
                 </li>
               </ul>
             </div>
@@ -331,32 +270,30 @@ watch(jdContent, (newVal) => {
 </template>
 
 <style>
-/* 全局纸质风格字体设置 */
-body {
-  background-color: #f5f5f0;
+.bg-paper-texture {
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
 }
 
 .custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(120, 113, 108, 0.1);
-  border-radius: 3px;
+  background-color: rgba(168, 162, 158, 0.2);
+  border-radius: 2px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(120, 113, 108, 0.3);
+  background-color: rgba(168, 162, 158, 0.4);
 }
 
-.dashed-border {
-  background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='4' ry='4' stroke='%23FCA5A5FF' stroke-width='1' stroke-dasharray='4%2c 4' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e");
-  border: none;
+.shadow-paper-float {
+  box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1), 0 0 2px rgba(0,0,0,0.05);
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.5s ease-out;
+  animation: fadeIn 0.6s ease-out;
 }
 
 @keyframes fadeIn {
@@ -368,5 +305,9 @@ body {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.font-handwriting {
+  font-family: 'Caveat', cursive; /* Assuming global font load */
 }
 </style>

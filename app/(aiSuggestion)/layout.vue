@@ -7,7 +7,6 @@
       <!-- 左侧：诊断概览 Dashboard -->
       <ScoreDashboard
         :score="score"
-        :score-color="scoreColor"
         :issue-counts="issueCounts"
         :category-map="categoryMap"
         :grouped-suggestions="groupedSuggestions"
@@ -44,7 +43,7 @@ const {
   totalIssues,
   issueCounts,
   score,
-  scoreColor,
+  // scoreColor, // Removed as ScoreDashboard now handles color logic internally
   categoryMap,
   analyze
 } = useAiAnalysis()

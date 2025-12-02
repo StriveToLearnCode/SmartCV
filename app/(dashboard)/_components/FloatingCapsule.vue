@@ -1,121 +1,114 @@
 <template>
-  <Motion
-    drag
-    :dragMomentum="false"
-    :dragElastic="0.1"
-    class="fixed bottom-8 left-1/2 z-50 touch-none"
-    :style="{ x: '-50%' }"
-    @pointerdown="onPointerDown"
-  >
-    <!-- 纸条容器 -->
+  <div class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-end gap-4 pointer-events-none">
+    
+    <!-- 1. Interview First Aid Kit (Floating Button) -->
+    <!-- Only appears when 'showFirstAid' is true (mocked) -->
     <Motion
-      :initial="false"
-      :animate="{
-        width: isExpanded ? 'auto' : '48px',
-        height: 'auto',
-        borderRadius: isExpanded ? '12px' : '24px',
-        padding: isExpanded ? '0px' : '0px'
-      }"
-      :transition="{
-        type: 'spring',
-        stiffness: 250,
-        damping: 25
-      }"
-      class="relative bg-[#fdfbf7] bg-paper-texture border border-stone-200/80 shadow-[0_4px_20px_rgba(0,0,0,0.08)] backdrop-blur-sm overflow-hidden cursor-grab active:cursor-grabbing flex items-center justify-center"
-      :class="{ 'shadow-[0_8px_30px_rgba(0,0,0,0.12)] opacity-90 scale-[1.02]': isDragging }"
-      @dragStart="onDragStart"
-      @dragEnd="onDragEnd"
+      v-if="showFirstAid"
+      class="pointer-events-auto relative"
+      :initial="{ y: 100, rotate: 10 }"
+      :animate="{ y: 0, rotate: 0 }"
+      :transition="{ type: 'spring', delay: 1 }"
     >
-      <!-- 纸质纹理覆盖 -->
-      <div class="absolute inset-0 pointer-events-none bg-stone-50/30 mix-blend-multiply"></div>
+       <div 
+         class="relative group"
+         @click="toggleCheatSheet"
+       >
+          <!-- The Button -->
+          <div class="w-14 h-14 rounded-full bg-white border-2 border-stone-800 shadow-sticky flex items-center justify-center cursor-pointer hover:scale-110 transition-transform bg-paper-texture z-20 relative">
+             <span class="text-2xl">🚑</span>
+          </div>
+          
+          <!-- Badge -->
+          <div class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-white text-[10px] flex items-center justify-center border border-white z-30 animate-pulse">
+            1
+          </div>
 
-      <!-- 折叠状态: 图标 -->
-      <Motion
-        v-if="!isExpanded"
-        class="flex items-center justify-center w-[48px] h-[48px]"
-        :initial="{ opacity: 0, scale: 0.8 }"
-        :animate="{ opacity: 1, scale: 1 }"
-        :exit="{ opacity: 0, scale: 0.8 }"
-        @click="toggleExpand"
-      >
-        <!-- 默认折叠图标 -->
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="text-stone-600"
-        >
-          <rect x="3" y="3" width="7" height="7"></rect>
-          <rect x="14" y="3" width="7" height="7"></rect>
-          <rect x="14" y="14" width="7" height="7"></rect>
-          <rect x="3" y="14" width="7" height="7"></rect>
-        </svg>
-      </Motion>
+          <!-- Tooltip -->
+          <div class="absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap bg-stone-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+            面试急救包
+          </div>
+       </div>
 
-      <!-- 展开状态: Tab 列表 -->
-      <Motion
-        v-else
-        class="flex items-center p-1 min-w-max"
-        :initial="{ opacity: 0 }"
-        :animate="{ opacity: 1 }"
-        :exit="{ opacity: 0 }"
-      >
-        <div class="flex items-center gap-1">
-          <button
-            v-for="tab in tabs"
-            :key="tab.id"
-            @click.stop="selectTab(tab.id)"
-            class="relative px-4 py-2 text-sm font-medium transition-colors duration-300 rounded-[8px] group outline-none flex flex-col items-center gap-1 min-w-[70px]"
-            :class="[modelValue === tab.id ? 'text-stone-800' : 'text-stone-500 hover:text-stone-700']"
-          >
-            <!-- 文字 -->
-            <span class="relative z-10 font-serif tracking-wide">{{ tab.label }}</span>
+       <!-- The Cheat Sheet Modal (Pop-up) -->
+       <Motion
+         v-if="isCheatSheetOpen"
+         class="absolute bottom-20 left-1/2 -translate-x-1/2 w-[300px] md:w-[360px] origin-bottom"
+         :initial="{ scale: 0.8, opacity: 0, y: 20 }"
+         :animate="{ scale: 1, opacity: 1, y: 0 }"
+         :exit="{ scale: 0.8, opacity: 0, y: 20 }"
+       >
+          <div class="bg-[#fff] border-2 border-stone-800 rounded-sm shadow-2xl overflow-hidden relative">
+             <!-- Header -->
+             <div class="bg-red-50 p-4 border-b border-stone-100 flex justify-between items-center">
+                <h3 class="font-bold text-stone-800 font-serif">面试小抄 · 2:00 PM</h3>
+                <button @click.stop="isCheatSheetOpen = false" class="text-stone-400 hover:text-stone-800">×</button>
+             </div>
 
-            <!-- 底部指示条 -->
-            <Motion
-              v-if="modelValue === tab.id"
-              layoutId="active-paper-indicator"
-              class="absolute bottom-0.5 w-6 h-1 bg-stone-800/80 rounded-full"
-              :transition="{ type: 'spring', stiffness: 300, damping: 30 }"
-            />
+             <!-- Content -->
+             <div class="p-5 space-y-4 max-h-[60vh] overflow-y-auto">
+                <!-- Who -->
+                <div>
+                   <div class="text-[10px] font-bold text-stone-400 uppercase mb-1">面试官 (WHO)</div>
+                   <div class="text-lg font-bold">Sarah Lin <span class="font-normal text-sm text-stone-500">· Design Lead</span></div>
+                </div>
 
-            <!-- 悬停背景 -->
-            <div
-              class="absolute inset-0 rounded-[8px] bg-stone-100/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0"
-              v-if="modelValue !== tab.id"
-            ></div>
-          </button>
-        </div>
+                <!-- Say -->
+                <div class="bg-yellow-50 p-3 rounded border border-yellow-100 relative">
+                   <div class="absolute -top-2 -right-2 text-xl">📌</div>
+                   <div class="text-[10px] font-bold text-yellow-600 uppercase mb-1">记得说 (SAY)</div>
+                   <ul class="text-sm text-stone-700 space-y-1 list-disc list-inside">
+                      <li>SaaS 平台重构经验</li>
+                      <li>设计系统搭建能力</li>
+                      <li class="bg-yellow-200/50 inline-block px-1">数据驱动：效率提升 30%</li>
+                   </ul>
+                </div>
 
-        <!-- 收起/折叠按钮 -->
-        <button
-          @click.stop="handleClose"
-          class="ml-2 w-8 h-8 flex items-center justify-center text-stone-400 hover:text-stone-600 hover:bg-stone-100/50 rounded-full transition-colors mr-1"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
-      </Motion>
+                <!-- Ask -->
+                <div>
+                   <div class="text-[10px] font-bold text-stone-400 uppercase mb-1">反问 (ASK)</div>
+                   <p class="text-sm text-stone-600 italic">"团队目前最大的挑战是什么？"</p>
+                </div>
+             </div>
+             
+             <!-- Footer -->
+             <div class="bg-stone-50 p-3 text-center text-xs text-stone-400 border-t border-stone-100">
+                深呼吸，你可以的。
+             </div>
+          </div>
+       </Motion>
     </Motion>
-  </Motion>
+
+    <!-- 2. Main Navigation Capsule -->
+    <Motion
+      class="pointer-events-auto bg-[#fdfbf7] bg-paper-texture border border-stone-200/80 shadow-[0_8px_30px_rgba(0,0,0,0.12)] rounded-full p-1 flex items-center backdrop-blur-sm"
+      :initial="{ y: 20, opacity: 0 }"
+      :animate="{ y: 0, opacity: 1 }"
+    >
+      <button
+        v-for="tab in tabs"
+        :key="tab.id"
+        @click="selectTab(tab.id)"
+        class="relative px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 group flex items-center gap-2 outline-none"
+        :class="modelValue === tab.id ? 'text-stone-800' : 'text-stone-500 hover:text-stone-700'"
+      >
+        <!-- Active Background -->
+        <Motion
+          v-if="modelValue === tab.id"
+          layoutId="capsule-active"
+          class="absolute inset-0 bg-stone-100 border border-stone-200 rounded-full shadow-sm"
+          :transition="{ type: 'spring', stiffness: 300, damping: 30 }"
+        />
+        
+        <!-- Content -->
+        <span class="relative z-10 flex items-center gap-2 font-serif tracking-wide">
+           <span>{{ tab.icon }}</span>
+           <span v-if="modelValue === tab.id || isHovered" class="hidden md:inline">{{ tab.label }}</span>
+        </span>
+      </button>
+    </Motion>
+
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -125,6 +118,7 @@ import { Motion } from 'motion-v'
 interface Tab {
   id: string
   label: string
+  icon: string
 }
 
 defineProps<{
@@ -135,61 +129,30 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void
 }>()
 
-const isExpanded = ref(false)
-const isDragging = ref(false)
-const startPos = ref({ x: 0, y: 0 })
+const showFirstAid = ref(true) // Mock: Always show for demo
+const isCheatSheetOpen = ref(false)
+const isHovered = ref(false)
 
 const tabs: Tab[] = [
-  { id: 'overview', label: '概览' },
-  { id: 'progress', label: '进度' },
-  { id: 'suggestion', label: '建议' },
-  { id: 'templates', label: '模板' }
+  { id: 'overview', label: '概览', icon: '🏠' },
+  { id: 'progress', label: '进度', icon: '🗺️' }, // Changed to map icon
+  { id: 'suggestion', label: '建议', icon: '💡' },
+  { id: 'templates', label: '模板', icon: '🎨' }
 ]
 
 const selectTab = (id: string) => {
   emit('update:modelValue', id)
 }
 
-const onPointerDown = (e: PointerEvent) => {
-  // 记录按下时的位置，用于后续计算移动距离
-  startPos.value = { x: e.clientX, y: e.clientY }
-}
-
-const onDragStart = () => {
-  isDragging.value = true
-}
-
-const onDragEnd = () => {
-  // 延迟重置状态，防止拖拽结束时立即触发 click 事件导致展开
-  setTimeout(() => {
-    isDragging.value = false
-  }, 300)
-}
-
-const toggleExpand = (e: MouseEvent) => {
-  // 计算按下和松开的距离
-  const dx = Math.abs(e.clientX - startPos.value.x)
-  const dy = Math.abs(e.clientY - startPos.value.y)
-
-  // 如果移动超过 5px，视为拖拽操作，不触发点击
-  if (dx > 5 || dy > 5) {
-    return
-  }
-
-  // 双重保险：如果 drag 状态未重置，也不触发
-  if (isDragging.value) {
-    return
-  }
-
-  isExpanded.value = !isExpanded.value
-}
-
-const handleClose = () => {
-  isExpanded.value = false
+const toggleCheatSheet = () => {
+  isCheatSheetOpen.value = !isCheatSheetOpen.value
 }
 </script>
 
 <style scoped>
+.shadow-sticky {
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
 .bg-paper-texture {
   background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
 }

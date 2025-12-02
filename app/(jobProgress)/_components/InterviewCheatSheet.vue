@@ -1,152 +1,125 @@
 <template>
   <Teleport to="body">
-    <Transition name="paper-slide">
-      <div
-        v-if="modelValue"
-        class="fixed inset-0 z-[100] flex items-end md:items-center justify-center md:justify-end md:pr-10 pb-0 md:pb-0 pointer-events-none"
-      >
-        <!-- Backdrop (Invisible but clickable to close) -->
+    <Transition name="unfold">
+      <div v-if="modelValue" class="fixed inset-0 z-[100] flex items-end justify-end p-4 sm:p-8 pointer-events-none">
+        <!-- Backdrop -->
         <div
-          class="absolute inset-0 bg-black/20 backdrop-blur-[1px] transition-opacity pointer-events-auto"
+          class="absolute inset-0 bg-stone-900/30 backdrop-blur-sm transition-opacity pointer-events-auto"
           @click="close"
         ></div>
 
-        <!-- The Paper Card -->
+        <!-- The Cheat Sheet: Folded Paper Style -->
         <div
-          class="relative w-full md:w-[380px] h-[85vh] md:h-[600px] bg-[#fdfbf7] rounded-t-2xl md:rounded-xl shadow-2xl overflow-hidden transform transition-all duration-500 ease-out pointer-events-auto flex flex-col"
-          :class="{ 'translate-y-full md:translate-x-full': !modelValue }"
+          class="relative w-full md:w-[450px] max-h-[85vh] bg-[#fdfbf7] rounded-sm shadow-2xl overflow-hidden pointer-events-auto flex flex-col origin-bottom-right rotate-1"
         >
           <!-- Paper Texture -->
           <div class="absolute inset-0 bg-paper-texture opacity-50 pointer-events-none"></div>
 
-          <!-- Top Fold/Binding Visual -->
-          <div class="h-8 bg-stone-100 border-b border-stone-200 flex items-center justify-center relative shrink-0">
-            <div class="w-12 h-1 bg-stone-300 rounded-full"></div>
-            <!-- Close Button for Desktop -->
-            <button
-              @click="close"
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 transition-colors md:block hidden"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path
-                  fill-rule="evenodd"
-                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-            </button>
+          <!-- Fold Effect (Top Right Corner) -->
+          <div
+            class="absolute top-0 right-0 w-12 h-12 bg-gradient-to-bl from-stone-200 to-white shadow-md z-20"
+            style="clip-path: polygon(0 0, 100% 100%, 0 100%)"
+          ></div>
+
+          <!-- Top Tape -->
+          <div
+            class="absolute -top-3 left-1/2 -translate-x-1/2 w-32 h-8 bg-yellow-100/80 border border-yellow-200 rotate-1 shadow-sm z-20"
+          ></div>
+
+          <!-- Header Area -->
+          <div class="p-8 pb-4 border-b border-dashed border-stone-200 relative">
+            <button @click="close" class="absolute top-4 right-4 text-stone-400 hover:text-stone-600 z-30">×</button>
+            <h2 class="text-2xl font-bold text-stone-800 font-serif tracking-tight flex items-center gap-2">
+              <span>🚑</span> 面试急救包
+            </h2>
+            <p class="text-xs text-stone-500 mt-2 font-serif italic">"Deep breath. 重点都帮你列好了。"</p>
           </div>
 
-          <!-- Content Scroll Area -->
-          <div class="flex-1 overflow-y-auto p-6 md:p-8 space-y-8 relative no-scrollbar">
-            <!-- Header -->
-            <div class="text-center space-y-1">
-              <div
-                class="inline-block px-3 py-1 bg-stone-800 text-white text-[10px] font-bold tracking-widest uppercase rounded-full mb-2"
-              >
-                Interview Cheat Sheet
+          <!-- Scrollable Content -->
+          <div class="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar">
+            <!-- 1. WHO: Sticky Note -->
+            <div class="relative group transform rotate-1 hover:rotate-0 transition-transform duration-300">
+              <div class="bg-yellow-50 border border-yellow-100 p-5 shadow-sm relative">
+                <!-- Pin -->
+                <div
+                  class="absolute -top-3 left-1/2 w-3 h-3 rounded-full bg-red-400 shadow-sm z-10 border border-red-500"
+                ></div>
+
+                <h3 class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-3">WHO: 你的面试官</h3>
+                <div class="flex items-center gap-4">
+                  <div
+                    class="w-12 h-12 bg-white rounded-full border-2 border-stone-100 flex items-center justify-center text-2xl"
+                  >
+                    👤
+                  </div>
+                  <div>
+                    <div class="text-xl font-bold text-stone-800">{{ data?.interviewer?.name || '待确认' }}</div>
+                    <div
+                      class="text-xs bg-white px-2 py-1 rounded border border-stone-100 inline-block mt-1 text-stone-500"
+                    >
+                      {{ data?.interviewer?.role || 'Hiring Manager' }}
+                    </div>
+                  </div>
+                </div>
               </div>
-              <h2 class="text-xl font-serif font-bold text-stone-800">面试急救包</h2>
-              <p class="text-xs text-stone-500 font-serif italic">深呼吸，你已经准备好了</p>
             </div>
 
-            <!-- 1. WHO -->
-            <section class="relative group">
-              <div
-                class="absolute -left-3 top-0 text-[10px] font-bold text-stone-300 -rotate-90 origin-bottom-right translate-y-4 uppercase tracking-widest"
-              >
-                Who
+            <!-- 2. WHAT: Job Keywords (Highlighter style) -->
+            <div>
+              <h3 class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-2">WHAT: 岗位关键词</h3>
+              <div class="flex flex-wrap gap-2">
+                <span class="bg-yellow-200/70 px-2 py-1 rounded-sm text-sm font-bold text-stone-800 transform -rotate-1"
+                  >User Experience</span
+                >
+                <span class="bg-green-200/70 px-2 py-1 rounded-sm text-sm font-bold text-stone-800 transform rotate-2"
+                  >Vue.js</span
+                >
+                <span class="bg-blue-200/70 px-2 py-1 rounded-sm text-sm font-bold text-stone-800 transform -rotate-1"
+                  >System Design</span
+                >
               </div>
-              <div
-                class="bg-white border border-stone-200 p-4 rounded-lg shadow-sm rotate-1 transition-transform group-hover:rotate-0"
-              >
-                <div class="text-xs text-stone-400 mb-1 uppercase font-bold tracking-wider">你要面对的是</div>
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-full bg-stone-100 flex items-center justify-center text-xl">👤</div>
-                  <div>
-                    <div class="text-2xl font-handwriting text-stone-800 leading-none mb-1">
-                      {{ data?.interviewer?.name || '未知面试官' }}
-                    </div>
-                    <div class="text-xs font-bold text-stone-500 bg-stone-100 inline-block px-1.5 py-0.5 rounded">
-                      {{ data?.interviewer?.role || 'HR / Hiring Manager' }}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
+            </div>
 
-            <!-- 2. WHAT -->
-            <section class="relative group">
-              <div
-                class="absolute -left-3 top-0 text-[10px] font-bold text-stone-300 -rotate-90 origin-bottom-right translate-y-4 uppercase tracking-widest"
-              >
-                What
-              </div>
-              <div class="space-y-3">
-                <div class="text-xs text-stone-400 uppercase font-bold tracking-wider pl-1">核心关键词 (JD提取)</div>
-                <div class="flex flex-wrap gap-2">
-                  <div
-                    v-for="(kw, idx) in data?.keywords || defaultKeywords"
-                    :key="idx"
-                    class="px-3 py-2 bg-yellow-100/80 border border-yellow-200/50 text-stone-800 font-serif font-bold text-lg rounded-md shadow-sm transform transition-transform hover:scale-105 cursor-default marker-highlight"
-                    :style="{ transform: `rotate(${Math.random() * 4 - 2}deg)` }"
-                  >
-                    {{ kw }}
-                  </div>
-                </div>
-              </div>
-            </section>
+            <!-- 3. SAY: Highlights -->
+            <div class="space-y-4">
+              <h3 class="text-[10px] font-bold text-stone-400 uppercase tracking-widest">SAY: 你的高光时刻</h3>
+              <ul class="space-y-3">
+                <li
+                  v-for="(story, idx) in data?.stories || defaultStories"
+                  :key="idx"
+                  class="flex gap-3 text-sm text-stone-700 group"
+                >
+                  <span class="font-bold text-stone-300 font-mono">{{ idx + 1 }}.</span>
+                  <span class="relative leading-relaxed">
+                    {{ story }}
+                    <span
+                      class="absolute bottom-0 left-0 w-full h-2 bg-yellow-100/50 -z-10 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500"
+                    ></span>
+                  </span>
+                </li>
+              </ul>
+            </div>
 
-            <!-- 3. SAY -->
-            <section class="relative">
-              <div
-                class="absolute -left-3 top-0 text-[10px] font-bold text-stone-300 -rotate-90 origin-bottom-right translate-y-4 uppercase tracking-widest"
-              >
-                Say
-              </div>
-              <div class="bg-stone-50 border-l-4 border-stone-300 p-4 rounded-r-lg space-y-3">
-                <div class="text-xs text-stone-400 uppercase font-bold tracking-wider">你的高光时刻 (一句话备忘)</div>
-                <ul class="space-y-3">
-                  <li
-                    v-for="(story, idx) in data?.stories || defaultStories"
-                    :key="idx"
-                    class="flex gap-3 text-sm font-serif text-stone-700 leading-relaxed"
-                  >
-                    <span class="font-bold text-stone-400">{{ idx + 1 }}.</span>
-                    <span>{{ story }}</span>
-                  </li>
-                </ul>
-              </div>
-            </section>
-
-            <!-- 4. ASK -->
-            <section class="relative pb-4">
-              <div
-                class="absolute -left-3 top-0 text-[10px] font-bold text-stone-300 -rotate-90 origin-bottom-right translate-y-4 uppercase tracking-widest"
-              >
-                Ask
-              </div>
-              <div class="border-t border-dashed border-stone-300 pt-4">
-                <div class="text-xs text-stone-400 uppercase font-bold tracking-wider mb-3">如果不记得问什么...</div>
-                <div class="grid gap-3">
-                  <div
-                    v-for="(q, idx) in data?.questions || defaultQuestions"
-                    :key="idx"
-                    class="text-xs text-stone-500 bg-white border border-stone-100 p-3 rounded shadow-sm font-serif italic hover:text-stone-800 hover:border-stone-300 transition-colors cursor-default"
-                  >
-                    "{{ q }}"
-                  </div>
-                </div>
-              </div>
-            </section>
+            <!-- 4. ASK: The Question -->
+            <div
+              class="bg-stone-800 p-5 rounded-sm shadow-lg transform -rotate-1 text-[#f7f5f2] relative overflow-hidden"
+            >
+              <div class="absolute -right-4 -bottom-4 text-6xl text-stone-700 font-serif opacity-50">?</div>
+              <h3 class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-2">ASK: 必杀问题</h3>
+              <p class="text-sm font-medium font-serif italic leading-relaxed">
+                "{{ (data?.questions && data.questions[0]) || defaultQuestions[0] }}"
+              </p>
+            </div>
           </div>
 
-          <!-- Footer / Fold Hint -->
-          <div
-            class="p-4 border-t border-stone-100 text-center text-stone-400 text-[10px] uppercase tracking-widest cursor-pointer hover:bg-stone-50 transition-colors"
-            @click="close"
-          >
-            点击空白处收起
+          <!-- Footer Action -->
+          <div class="p-4 bg-stone-50 border-t border-stone-200 text-center">
+            <button
+              @click="close"
+              class="text-xs font-bold text-stone-400 hover:text-stone-600 uppercase tracking-widest"
+            >
+              收起并开始面试
+            </button>
           </div>
         </div>
       </div>
@@ -155,7 +128,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
 import type { CheatSheetData } from '../types'
 
 const props = defineProps<{
@@ -169,67 +141,23 @@ const close = () => {
   emit('update:modelValue', false)
 }
 
-const defaultKeywords = ['用户增长', '数据驱动', '跨部门协作']
-const defaultStories = [
-  '提及在Q3项目中通过A/B测试提升转化率15%的经历',
-  '重点讲作为Owner协调设计与研发资源的例子',
-  '如果是压力面，用去年的“双十一”突发故障处理来展示抗压能力'
-]
-const defaultQuestions = ['您对这个岗位未来半年的核心期待是什么？', '目前的团队结构和协作模式是怎样的？']
+const defaultStories = ['在上一份工作中，通过优化流程提升了 20% 的效率', '主导了核心模块的重构，减少了 30% 的技术债']
+const defaultQuestions = ['目前的团队结构和协作模式是怎样的？']
 </script>
 
 <style scoped>
 .bg-paper-texture {
-  background-color: #fdfbf7;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
-  background-repeat: repeat;
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%239C92AC' fill-opacity='0.03' fill-rule='evenodd'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7z' /%3E%3C/g%3E%3C/svg%3E");
 }
 
-.font-handwriting {
-  font-family: 'Caveat', 'Comic Sans MS', 'Marker Felt', cursive;
+.unfold-enter-active,
+.unfold-leave-active {
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.marker-highlight {
-  background-image: linear-gradient(120deg, rgba(250, 204, 21, 0.4) 0%, rgba(250, 204, 21, 0) 100%);
-  background-repeat: no-repeat;
-  background-size: 100% 40%;
-  background-position: 0 80%;
-}
-
-/* Animations */
-.paper-slide-enter-active,
-.paper-slide-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.paper-slide-enter-from,
-.paper-slide-leave-to {
+.unfold-enter-from,
+.unfold-leave-to {
   opacity: 0;
-}
-
-/* Inner content slide */
-.paper-slide-enter-active .relative,
-.paper-slide-leave-active .relative {
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.paper-slide-enter-from .relative,
-.paper-slide-leave-to .relative {
-  transform: translateY(100%);
-}
-
-@media (min-width: 768px) {
-  .paper-slide-enter-from .relative,
-  .paper-slide-leave-to .relative {
-    transform: translateX(100%);
-  }
-}
-
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+  transform: translateY(100px) scale(0.5) rotate(10deg);
 }
 </style>
