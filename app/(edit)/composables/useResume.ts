@@ -9,6 +9,7 @@ export interface ResumeSection {
 }
 
 export interface ResumeData {
+  template: 'classic' | 'modern' | 'minimal'
   basics: {
     name: string
     email: string
@@ -54,6 +55,7 @@ export interface ResumeData {
 }
 
 const defaultResume: ResumeData = {
+  template: 'classic',
   basics: {
     name: '张三',
     title: '高级前端工程师',
@@ -125,36 +127,37 @@ const defaultResume: ResumeData = {
 // History management
 const HISTORY_LIMIT = 20
 
+// Shared state (Singleton)
+const resumeData = ref<ResumeData>(JSON.parse(JSON.stringify(defaultResume)))
+
+// Undo/Redo State
+const history = ref<string[]>([JSON.stringify(defaultResume)])
+const historyIndex = ref(0)
+const isUndoing = ref(false)
+
+watch(
+  resumeData,
+  (newVal) => {
+    if (isUndoing.value) return
+
+    const snapshot = JSON.stringify(newVal)
+    if (snapshot === history.value[historyIndex.value]) return
+
+    if (historyIndex.value < history.value.length - 1) {
+      history.value = history.value.slice(0, historyIndex.value + 1)
+    }
+
+    history.value.push(snapshot)
+    if (history.value.length > HISTORY_LIMIT) {
+      history.value.shift()
+    } else {
+      historyIndex.value++
+    }
+  },
+  { deep: true }
+)
+
 export const useResume = () => {
-  const resumeData = ref<ResumeData>(JSON.parse(JSON.stringify(defaultResume)))
-
-  // Undo/Redo State
-  const history = ref<string[]>([JSON.stringify(defaultResume)])
-  const historyIndex = ref(0)
-  const isUndoing = ref(false)
-
-  watch(
-    resumeData,
-    (newVal) => {
-      if (isUndoing.value) return
-
-      const snapshot = JSON.stringify(newVal)
-      if (snapshot === history.value[historyIndex.value]) return
-
-      if (historyIndex.value < history.value.length - 1) {
-        history.value = history.value.slice(0, historyIndex.value + 1)
-      }
-
-      history.value.push(snapshot)
-      if (history.value.length > HISTORY_LIMIT) {
-        history.value.shift()
-      } else {
-        historyIndex.value++
-      }
-    },
-    { deep: true }
-  )
-
   const undo = () => {
     if (historyIndex.value > 0) {
       isUndoing.value = true

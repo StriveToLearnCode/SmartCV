@@ -42,6 +42,16 @@ export interface TimelineNode {
     suggestions: string
   }
   growthStats?: GrowthStat[] // New field
+  
+  // Audio Review
+  audioRecording?: {
+    file?: File | null // Runtime only
+    url?: string
+    name: string
+    duration?: string
+    transcription?: string
+    isTranscribing?: boolean
+  }
 }
 
 export interface ContactPerson {
