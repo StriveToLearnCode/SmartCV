@@ -1,0 +1,12 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "ignoreExportsUsedInFile": {
+    "interface": true,
+    "type": true
+  },
+  "tags": ["-lintignore"],
+  "entry": ["app/main.ts", "app/main.vue", "app/router/index.ts"],
+  "project": ["app/**/*.ts", "app/**/*.vue"],
+  "ignore": ["app/**/layout.vue", "app/**/default.ts", "app/**/types.ts", "app/env.d.ts"],
+  "ignoreDependencies": ["@heroicons/vue", "tailwindcss", "@commitlint/cli", "prettier"]
+}
