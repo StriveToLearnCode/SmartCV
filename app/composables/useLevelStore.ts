@@ -27,11 +27,10 @@ const TITLES = [
   '总监潜质', // Level 7
   'VP候选人', // Level 8
   'CEO预备役', // Level 9
-  '创业大亨'  // Level 10
+  '创业大亨' // Level 10
 ]
 
 export const useLevelStore = () => {
-  
   const currentLevelInfo = computed(() => {
     const levelIndex = state.value.level - 1
     const currentThreshold = LEVEL_THRESHOLDS[levelIndex]
@@ -39,7 +38,7 @@ export const useLevelStore = () => {
     const levelXp = state.value.totalXp - currentThreshold
     const requiredXp = nextThreshold - currentThreshold
     const progress = Math.min(100, Math.max(0, (levelXp / requiredXp) * 100))
-    
+
     return {
       level: state.value.level,
       title: TITLES[levelIndex] || TITLES[TITLES.length - 1],
@@ -52,14 +51,14 @@ export const useLevelStore = () => {
   const addXp = (amount: number, reason?: string) => {
     state.value.totalXp += amount
     state.value.currentXp += amount
-    
+
     // Check for level up
-    const newLevel = LEVEL_THRESHOLDS.findIndex(t => state.value.totalXp < t) 
+    const newLevel = LEVEL_THRESHOLDS.findIndex((t) => state.value.totalXp < t)
     // if totalXp is 150 (Thresholds: 0, 100, 300), findIndex returns 2 (300). Level is 2.
     // if totalXp is 50 (Thresholds: 0, 100), findIndex returns 1 (100). Level is 1.
-    
+
     let calculatedLevel = newLevel === -1 ? LEVEL_THRESHOLDS.length : newLevel
-    
+
     if (calculatedLevel > state.value.level) {
       // Level Up!
       state.value.level = calculatedLevel
@@ -75,4 +74,3 @@ export const useLevelStore = () => {
     addXp
   }
 }
-
