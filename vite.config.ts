@@ -3,6 +3,7 @@ import vue from '@vitejs/plugin-vue'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 import AutoImport from 'unplugin-auto-import/vite'
+import { codeInspectorPlugin } from 'code-inspector-plugin'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
@@ -14,11 +15,14 @@ export default defineConfig({
       eslintrc: {
         enabled: true
       }
+    }),
+    codeInspectorPlugin({
+      bundler: 'vite'
     })
   ],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'app')
+      '@': path.resolve(__dirname, '.')
     }
   }
 })
